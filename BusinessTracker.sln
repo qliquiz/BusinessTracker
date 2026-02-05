@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessTracker.Domain", "BusinessTracker.Domain\BusinessTracker.Domain.csproj", "{3436319E-3788-469A-BE06-D3C5D943D31F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessTracker.Tests", "BusinessTracker.Tests\BusinessTracker.Tests.csproj", "{65365456-E13D-414D-BC30-2124F61133A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessTracker.Console", "BusinessTracker.Console\BusinessTracker.Console.csproj", "{35318791-25EF-46B8-A806-EA018C7A4DBE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3436319E-3788-469A-BE06-D3C5D943D31F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3436319E-3788-469A-BE06-D3C5D943D31F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3436319E-3788-469A-BE06-D3C5D943D31F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3436319E-3788-469A-BE06-D3C5D943D31F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65365456-E13D-414D-BC30-2124F61133A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65365456-E13D-414D-BC30-2124F61133A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65365456-E13D-414D-BC30-2124F61133A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65365456-E13D-414D-BC30-2124F61133A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35318791-25EF-46B8-A806-EA018C7A4DBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35318791-25EF-46B8-A806-EA018C7A4DBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35318791-25EF-46B8-A806-EA018C7A4DBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35318791-25EF-46B8-A806-EA018C7A4DBE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
