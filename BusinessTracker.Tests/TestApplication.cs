@@ -89,7 +89,7 @@ public class TestApplication
         var validOrg = new Organization
         {
             Name = "ООО Ромашка",
-            Address = "123456, г. Иркутск, ул. Ленина"
+            Address = "Россия, 138, Иркутская обл., г. Иркутск, ул. Ленина, дом 9"
         };
         var invalidOrg = new Organization
         {

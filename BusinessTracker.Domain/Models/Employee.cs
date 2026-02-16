@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using BusinessTracker.Domain.Core;
 using BusinessTracker.Domain.Core.Attributes;
 using BusinessTracker.Domain.Core.Enums;
 
@@ -8,7 +7,7 @@ namespace BusinessTracker.Domain.Models;
 /// <summary>
 /// Модель сотрудника.
 /// </summary>
-public class Employee : BaseEntity
+public class Employee
 {
     /// <summary>
     /// Наименование.
@@ -27,6 +26,4 @@ public class Employee : BaseEntity
     /// Роль сотрудника.
     /// </summary>
     public EmployeeRole Role { get; set; } = EmployeeRole.Manager;
-    
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

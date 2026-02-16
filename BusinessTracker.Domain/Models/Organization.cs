@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using BusinessTracker.Domain.Core;
 using BusinessTracker.Domain.Core.Attributes;
 
 namespace BusinessTracker.Domain.Models;
@@ -7,7 +6,7 @@ namespace BusinessTracker.Domain.Models;
 /// <summary>
 /// Модель организации.
 /// </summary>
-public class Organization : BaseEntity
+public class Organization
 {
     /// <summary>
     /// Наименование.
@@ -22,6 +21,4 @@ public class Organization : BaseEntity
     [Required]
     [Address]
     public required string Address { get; set; } = string.Empty;
-    
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

@@ -11,7 +11,7 @@ public class AddressAttribute : ValidationAttribute
     /// <summary>
     ///  Шаблон для проверки адреса РФ.
     /// </summary>
-    private const string Template = @"^(\d{6},)?\s?.*,.*$";
+    private const string Template = @"^([^,]+,){5,}[^,]+$";
 
     public override bool IsValid(object? value)
     {
