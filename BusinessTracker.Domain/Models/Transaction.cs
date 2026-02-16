@@ -19,4 +19,7 @@ public class Transaction : BaseEntity
 
     public Guid NomenclatureId { get; set; }
     public virtual Nomenclature? Nomenclature { get; set; }
+
+    public Guid EmployeeId { get; set; }
+    public virtual Employee? Employee { get; set; }
 }

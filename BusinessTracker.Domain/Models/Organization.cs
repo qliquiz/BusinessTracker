@@ -22,4 +22,6 @@ public class Organization : BaseEntity
     [Required]
     [Address]
     public required string Address { get; set; } = string.Empty;
+    
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

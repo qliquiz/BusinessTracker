@@ -27,4 +27,6 @@ public class Employee : BaseEntity
     /// Роль сотрудника.
     /// </summary>
     public EmployeeRole Role { get; set; } = EmployeeRole.Manager;
+    
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }
