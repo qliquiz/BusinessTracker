@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using BusinessTracker.Domain.Core.Abstractions;
 
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
 /// Модель настроек загрузки.
 /// </summary>
-public class LoadSettings
+public class LoadSettings : IId
 {
+    public Guid Id { get; init; }
+
     /// <summary>
     /// Наименование.
     /// </summary>

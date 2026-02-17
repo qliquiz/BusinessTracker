@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using BusinessTracker.Domain.Core.Abstractions;
 
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
 /// Модель номенклатуры.
 /// </summary>
-public class Nomenclature
+public class Nomenclature : IId
 {
+    public Guid Id { get; init; }
+
     /// <summary>
     /// Наименование.
     /// </summary>

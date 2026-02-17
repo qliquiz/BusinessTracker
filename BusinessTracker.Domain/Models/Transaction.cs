@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using BusinessTracker.Domain.Core.Abstractions;
 
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
 /// Модель транзакции.
 /// </summary>
-public class Transaction
+public class Transaction : IId
 {
+    public Guid Id { get; init; }
+
     /// <summary>
     /// Сумма.
     /// </summary>

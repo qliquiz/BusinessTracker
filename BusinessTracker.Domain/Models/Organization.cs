@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BusinessTracker.Domain.Core.Abstractions;
 using BusinessTracker.Domain.Core.Attributes;
 
 namespace BusinessTracker.Domain.Models;
@@ -6,8 +7,10 @@ namespace BusinessTracker.Domain.Models;
 /// <summary>
 /// Модель организации.
 /// </summary>
-public class Organization
+public class Organization : IId
 {
+    public Guid Id { get; init; }
+
     /// <summary>
     /// Наименование.
     /// </summary>

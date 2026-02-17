@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using BusinessTracker.Domain.Core.Abstractions;
 
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
 /// Модель категории номераклатуры.
 /// </summary>
-public class Category
+public class Category: IId
 {
+    public Guid Id { get; init; }
+
     /// <summary>
     /// Наименование.
     /// </summary>
