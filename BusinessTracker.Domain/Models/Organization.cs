@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using BusinessTracker.Domain.Core.Abstractions;
 using BusinessTracker.Domain.Core.Attributes;
 
 namespace BusinessTracker.Domain.Models;
@@ -7,10 +6,8 @@ namespace BusinessTracker.Domain.Models;
 /// <summary>
 /// Модель организации.
 /// </summary>
-public class Organization : IId
+public class Organization : DomainModel
 {
-    public Guid Id { get; init; }
-
     /// <summary>
     /// Наименование.
     /// </summary>
@@ -19,9 +16,16 @@ public class Organization : IId
     public required string Name { get; set; } = string.Empty;
 
     /// <summary>
+    /// ИНН.
+    /// </summary>
+    [Required]
+    [Template(@"^[0-9]{10}$")]
+    public string Inn { get; set; } = string.Empty;
+
+    /// <summary>
     /// Юридический адрес (формат КЛАДР).
     /// </summary>
     [Required]
-    [Address]
+    [Template(@"^(?=.*,.*,.*,.*,.*,.*)(?=.*,.*,.*,.*,.*,.*)?[\s\S]*$")]
     public required string Address { get; set; } = string.Empty;
 }

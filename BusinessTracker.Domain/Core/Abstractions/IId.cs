@@ -3,7 +3,7 @@ namespace BusinessTracker.Domain.Core.Abstractions;
 /// <summary>
 /// Общий интерфейс для работы с моделями.
 /// </summary>
-public interface IId
+public interface IId : IModel
 {
     /// <summary>
     /// Уникальный идентификатор.

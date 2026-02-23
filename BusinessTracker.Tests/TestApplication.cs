@@ -1,18 +1,32 @@
-using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using BusinessTracker.Domain;
 using BusinessTracker.Domain.Core.Attributes;
-using BusinessTracker.Domain.Logic;
+using BusinessTracker.Domain.Core.Enums;
 using BusinessTracker.Domain.Models;
-using BusinessTracker.Domain.Models.Dto;
 
 namespace BusinessTracker.Tests;
 
 /// <summary>
 /// Набор модульных тестов в рамках приложения.
 /// </summary>
-public class TestApplication
+public class ApplicationTests
 {
+    /// <summary>
+    /// Проверить получение версии приложения.
+    /// </summary>
+    [Test]
+    public void CurrentVersion_Show_Any()
+    {
+        // Подготовка
+        var version = CurrentApplication.CurrentVersion();
+
+        // Действие
+
+        // Проверка
+        Assert.That(!string.IsNullOrEmpty(version));
+    }
+
     /// <summary>
     /// Проверяем создание категории с null в наименовании.
     /// </summary>
@@ -22,7 +36,7 @@ public class TestApplication
         // Подготовка
         var domain = new Category
         {
-            Name = ""
+            Name = "test"
         };
 
         // Действие
@@ -50,24 +64,24 @@ public class TestApplication
     }
 
     /// <summary>
-    /// Проверить наличите атрибута <see cref="PhoneNumberAttribute"/>.
+    /// Проверить наличите атрибута <see cref="TemplateAttribute"/>.
     /// </summary>
     [Test]
-    public void Create_Employee_ExistsPhoneNumberAttribute()
+    public void Create_Employee_ExistsPhoneTemplateAttribute()
     {
         // Подготовка
         var domain = new Employee
         {
-            Name = "Artem",
-            PhoneNumber = "+79149021142"
+            PhoneNumber = "+79041528366",
+            Name = "test"
         };
 
         // Действие
         var properties = domain.GetType()
             .GetProperties()
-            .Where(x => x.GetCustomAttribute<PhoneNumberAttribute>(true) is not null);
+            .Where(x => x.GetCustomAttribute<TemplateAttribute>(true) is not null);
         var propertyInfos = properties.ToArray();
-        var attribute = propertyInfos.First().GetCustomAttribute<PhoneNumberAttribute>();
+        var attribute = propertyInfos.First().GetCustomAttribute<TemplateAttribute>();
         var match = new Regex(attribute!.Template);
 
         // Проверки
@@ -80,78 +94,130 @@ public class TestApplication
     }
 
     /// <summary>
-    /// Проверка валидации адреса (КЛАДР).
+    /// Проверить соответствие адреса формату КЛАДР.
     /// </summary>
+    /// <param name="address">адрес для проверки</param>
+    /// <param name="result">ожидаемый вердикт</param>
     [Test]
-    public void Create_Organization_ValidatesAddress()
+    [TestCase(",Иркутская область, мкн. Современник,,,30,13", true)]
+    [TestCase("190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12", true)]
+    [TestCase("Ерунда,,,", false)]
+    public void Create_Organization_CheckTemplateAddress(string address, bool result)
     {
         // Подготовка
-        var validOrg = new Organization
+        var domain = new Organization
         {
-            Name = "ООО Ромашка",
-            Address = "Россия, 138, Иркутская обл., г. Иркутск, ул. Ленина, дом 9"
+            Name = "test", Id = Guid.NewGuid(), Address = address
         };
-        var invalidOrg = new Organization
-        {
-            Name = "ООО Рога и Копыта",
-            Address = "ул. Пушкина"
-        };
-        var validator = new AddressAttribute();
 
         // Действие
+        var property = domain.GetType().GetProperty("Address");
 
-        // Проверка
+        // Проверки                
+        var attribute = property!.GetCustomAttribute<TemplateAttribute>();
+        var match = new Regex(attribute!.Template);
         Assert.Multiple(() =>
         {
-            Assert.That(validator.IsValid(validOrg.Address), Is.True);
-            Assert.That(validator.IsValid(invalidOrg.Address), Is.False);
+            Assert.That(!string.IsNullOrEmpty(attribute.Template));
+            Assert.That(match.IsMatch(domain.Address), Is.EqualTo(result));
         });
     }
 
     /// <summary>
-    /// Проверка создания DTO и ограничений длины.
+    /// Комплектная проверка. Отрицательный сценарий.
     /// </summary>
     [Test]
-    public void Create_Dto_CheckConstraints()
+    public void Create_Transaction_FalseValidate()
     {
         // Подготовка
-        var dto = new JournalEntryDto
+        var transaction = new Transaction
         {
-            CheckNumber = "123456789012345678901"
+            Employee = new Employee { Name = "test" },
+            Owner = new Organization
+            {
+                Name = "test",
+                Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            },
+            Type = TransactionType.Sale,
+            Quantity = 1, Amount = 1,
+            Discount = 0,
+            TransactionDate = DateTimeOffset.Now,
+            Nomenclature = new Nomenclature
+            {
+                Name = "test",
+                Category = new Category
+                {
+                    Name = "test"
+                }
+            }
         };
-        var context = new ValidationContext(dto);
-        var results = new List<ValidationResult>();
 
         // Действие
-        var isValid = Validator.TryValidateObject(dto, context, results, true);
+        var result = transaction.Validate();
 
-        // Проверка
+        // Проверки
         Assert.Multiple(() =>
         {
-            Assert.That(isValid, Is.False);
-            Assert.That(results.Any(r => r.MemberNames.Contains(nameof(dto.CheckNumber))), Is.True);
+            Assert.That(!result);
+            Assert.That(transaction.IsError);
         });
+
+        Console.WriteLine($"Transaction error text: {transaction.ErrorText}");
     }
 
+    /// <summary>
+    /// Комплексная проверка. Положительный сценарий.
+    /// </summary>
     [Test]
-    public void Organization_CheckValidation_Helper()
+    public void Create_Transaction_TrueValidate()
     {
         // Подготовка
-        var invalidOrg = new Organization
+        var transaction = new Transaction
         {
-            Name = "",
-            Address = "BadAddress",
+            Employee = new Employee
+            {
+                Name = "test",
+                Owner = new Organization
+                {
+                    Name = "test",
+                    Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12",
+                    Inn = "0123456789"
+                }
+            },
+            Owner = new Organization
+            {
+                Name = "test",
+                Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12",
+                Inn = "0123456789"
+            },
+            Type = TransactionType.Sale,
+            Quantity = 1, Amount = 1,
+            Discount = 0,
+            TransactionDate = DateTimeOffset.Now,
+            Nomenclature = new Nomenclature
+            {
+                Name = "test",
+                Category = new Category
+                {
+                    Name = "test",
+                    Owner = new Organization
+                    {
+                        Name = "test",
+                        Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12",
+                        Inn = "0123456789"
+                    }
+                }
+            }
         };
 
         // Действие
-        var isValid = ValidationHelper.TryValidate(invalidOrg, out var errors);
+        var result = transaction.Validate();
 
+        // Проверки
         Assert.Multiple(() =>
         {
-            // Проверка
-            Assert.That(isValid, Is.False);
-            Assert.That(errors, Has.Count.EqualTo(2));
+            Assert.That(result);
+            Assert.That(!transaction.IsError);
         });
-        Console.WriteLine(ValidationHelper.GetErrorMessages(invalidOrg));
     }
 }

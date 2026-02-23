@@ -1,25 +1,34 @@
 using System.ComponentModel.DataAnnotations;
-using BusinessTracker.Domain.Core.Abstractions;
 
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
-/// Модель настроек загрузки.
+/// Модель настроек загрузки данных.
 /// </summary>
-public class LoadSettings : IId
+public class LoadingSettings : DomainModel
 {
-    public Guid Id { get; init; }
-
     /// <summary>
-    /// Наименование.
+    /// Организация владелец.
     /// </summary>
     [Required]
-    [StringLength(100)]
-    public required string Name { get; set; } = "Default";
+    public Organization Owner { get; set; } = null!;
 
     /// <summary>
-    /// Период хранения данных в месяцах.
+    /// Описание.
     /// </summary>
-    [Range(1, 36)]
-    public int DataRetentionMonths { get; set; } = 3;
+    [Required]
+    [StringLength(255)]
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Уникальный код транзакции для начала загрузки.
+    /// </summary>
+    [Required]
+    public long StartPosition { get; set; }
+
+    /// <summary>
+    /// Размер.
+    /// </summary>
+    [Required]
+    public long BatchSize { get; set; } = 1000;
 }

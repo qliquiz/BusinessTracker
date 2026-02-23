@@ -4,21 +4,21 @@ using System.Text.RegularExpressions;
 namespace BusinessTracker.Domain.Core.Attributes;
 
 /// <summary>
-/// Атрибут для фиксации шаблона телефона.
+/// Атрибут для проверки корректности строковых данных на основе регулярного выражения.
 /// </summary>
-public class PhoneNumberAttribute : ValidationAttribute
+public class TemplateAttribute : ValidationAttribute
 {
     /// <summary>
-    ///  Шаблон для проверки телефонного номера.
+    ///  Шаблон для проверки.
     /// </summary>
     public string Template { get; set; }
 
     /// <summary>
-    /// Конструктор класса <see cref="PhoneAttribute"/>.
+    /// Конструктор класса <see cref="TemplateAttribute"/>.
     /// </summary>
     /// <param name="template">Шаблон регулярного выражения.</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public PhoneNumberAttribute(string template)
+    public TemplateAttribute(string template)
     {
         Template = template ?? throw new ArgumentNullException(nameof(template));
     }
@@ -28,7 +28,7 @@ public class PhoneNumberAttribute : ValidationAttribute
         return value switch
         {
             null => true,
-            string phoneNumber => Regex.IsMatch(phoneNumber, Template),
+            string str => Regex.IsMatch(str, Template),
             _ => false
         };
     }
