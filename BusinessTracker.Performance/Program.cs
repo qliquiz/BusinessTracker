@@ -12,6 +12,18 @@ var config = builder.Build();
 var connectionString = config.GetConnectionString("DefaultConnection") ?? config["ConnectionString"] ??
     throw new InvalidOperationException("Connection string not found.");
 
+Console.WriteLine("--- Прогрев системы ---");
+await using (var warmupConnection = new SqlConnection(connectionString))
+{
+    await warmupConnection.OpenAsync();
+    await using (var command = new SqlCommand("SELECT TOP 1 * FROM journal", warmupConnection))
+    {
+        await command.ExecuteScalarAsync();
+    }
+}
+
+Console.WriteLine("Прогрев завершен. Запуск тестов...\n");
+
 Console.WriteLine("Запуск тестов производительности загрузки транзакций...");
 
 await LoadForDay();
@@ -57,9 +69,17 @@ async Task ExecuteAndMeasure(DateTime startDate, DateTime endDate)
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
 
-        var transTypes = await LoadTransactionTypes(connection);
+        const string query = @"
+            SELECT 
+                j.*, 
+                tt.description as TransTypeName 
+            FROM 
+                journal j
+            LEFT JOIN 
+                transtype tt ON j.transtype = tt.transtypeid
+            WHERE 
+                j.dater >= @startDate AND j.dater < @endDate";
 
-        const string query = "SELECT * FROM journal WHERE dater >= @startDate AND dater < @endDate";
         var command = new SqlCommand(query, connection);
         command.Parameters.AddWithValue("@startDate", startDate);
         command.Parameters.AddWithValue("@endDate", endDate);
@@ -67,11 +87,20 @@ async Task ExecuteAndMeasure(DateTime startDate, DateTime endDate)
         var adapter = new SqlDataAdapter(command);
         var dataSet = new DataSet();
         await Task.Run(() => adapter.Fill(dataSet));
+
+        if (dataSet.Tables.Count == 0)
+        {
+            Console.WriteLine("Предупреждение: Запрос не вернул ни одной таблицы данных. Пропускаем маппинг.");
+            stopwatch.Stop();
+            Console.WriteLine($"Загрузка и маппинг завершены за: {stopwatch.ElapsedMilliseconds} мс. (0 записей)");
+            return;
+        }
+
         var journalTable = dataSet.Tables[0];
 
         Console.WriteLine($"Найдено {journalTable.Rows.Count} записей.");
 
-        var transactions = DataMapper.LoadJournalTransactions(journalTable, transTypes);
+        var transactions = DataMapper.LoadJournalTransactions(journalTable);
         Console.WriteLine(transactions);
 
         stopwatch.Stop();
@@ -85,26 +114,4 @@ async Task ExecuteAndMeasure(DateTime startDate, DateTime endDate)
         Console.WriteLine($"Ошибка выполнения: {ex.Message}");
         Console.ResetColor();
     }
-}
-
-async Task<Dictionary<int, string>> LoadTransactionTypes(SqlConnection connection)
-
-{
-    var transTypes = new Dictionary<int, string>();
-
-    var command = new SqlCommand("SELECT transtypeid, description FROM transtype", connection);
-
-    await using var reader = await command.ExecuteReaderAsync();
-
-    while (await reader.ReadAsync())
-
-    {
-        var id = reader.GetInt32(0);
-
-        var description = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-
-        transTypes[id] = description;
-    }
-
-    return transTypes;
 }

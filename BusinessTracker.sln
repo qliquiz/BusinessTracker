@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessTracker.Domain", "BusinessTracker.Domain\BusinessTracker.Domain.csproj", "{3436319E-3788-469A-BE06-D3C5D943D31F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessTracker.Tests", "BusinessTracker.Tests\BusinessTracker.Tests.csproj", "{65365456-E13D-414D-BC30-2124F61133A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessTracker.Console", "BusinessTracker.Console\BusinessTracker.Console.csproj", "{35318791-25EF-46B8-A806-EA018C7A4DBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalAccount.Performance", "PersonalAccount.Performance\PersonalAccount.Performance.csproj", "{817FE503-5D5B-4500-96CC-3F6F7B924A93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessTracker.Performance", "BusinessTracker.Performance\BusinessTracker.Performance.csproj", "{817FE503-5D5B-4500-96CC-3F6F7B924A93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

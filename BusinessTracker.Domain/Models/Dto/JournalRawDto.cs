@@ -23,6 +23,7 @@ namespace BusinessTracker.Domain.Models.Dto
         /// <summary>
         /// Наименование типа транзакции.
         /// </summary>
+        [ColumnMapping("TransTypeName")]
         public string TransTypeName { get; set; } = string.Empty;
 
         /// <summary>

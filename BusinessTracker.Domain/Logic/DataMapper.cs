@@ -45,19 +45,13 @@ public static class DataMapper
     /// <summary>
     /// Загрузка и маппинг транзакций из DataTable.
     /// </summary>
-    public static List<JournalRowDto> LoadJournalTransactions(DataTable journalTable,
-        Dictionary<int, string> transTypes)
+    public static List<JournalRowDto> LoadJournalTransactions(DataTable journalTable)
     {
         var transactions = new List<JournalRowDto>();
 
         foreach (DataRow row in journalTable.Rows)
         {
             var dto = Map<JournalRowDto>(row);
-
-            if (transTypes.TryGetValue(dto.TypeCode, out var transTypeName))
-            {
-                dto.TransTypeName = transTypeName;
-            }
 
             if (dto.RawLoginId != 0)
             {
