@@ -1,26 +1,15 @@
 services:
-#  app:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    container_name: business_tracker_app
-#    depends_on:
-#      - postgres_db
-#      - mssql_db
-#    volumes:
-#      - ./client.appsettings.json:/src/release/appsettings.json
-
   postgres_db:
     image: postgres:latest
-    user: root
     container_name: business_tracker_postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRESQL_USER}
       POSTGRES_PASSWORD: ${POSTGRESQL_PASS}
+      POSTGRES_DB: ${POSTGRESQL_DB}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     ports:
-      - "${POSTGRESQL_PORT:-5433}:5433"
+      - "${POSTGRESQL_PORT}:5432"
     volumes:
       - ./pg_data:/var/lib/postgresql/data
 
