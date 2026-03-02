@@ -1,4 +1,0 @@
-@Api_HostAddress = http://localhost:5190
-
-GET {{Api_HostAddress}}/hello/
-Accept: application/json
