@@ -1,28 +1,19 @@
+﻿using System.Reflection;
 using BusinessTracker.Data;
+using DbUp;
 
-var builder = WebApplication.CreateBuilder(args);
+const string connectionString = "Host=localhost;Port=5433;Username=admin;Password=123456;Database=business_tracker";
 
-var app = builder.Build();
+var upgrader = DeployChanges.To
+    .PostgresqlDatabase(connectionString)
+    .WithScriptsEmbeddedInAssembly(Assembly.GetAssembly(typeof(DataMarker)))
+    .LogToConsole()
+    .Build();
 
-if (app.Environment.IsDevelopment())
+var result = upgrader.PerformUpgrade();
+if (!result.Successful)
 {
-    try
-    {
-        Console.WriteLine("Development environment detected. Initializing database...");
-        var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new InvalidOperationException("Connection string 'DefaultConnection' not found in appsettings.json.");
-        }
-
-        var initializer = new DatabaseInitializer(connectionString);
-        await initializer.ResetDatabaseAsync();
-        Console.WriteLine("Database initialization completed successfully.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"An error occurred during database initialization: {ex.Message}");
-    }
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine(result.Error);
+    Console.ResetColor();
 }
-
-app.Run();
