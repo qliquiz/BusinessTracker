@@ -486,3 +486,5 @@ $RECYCLE.BIN/
 # Volumes
 _infra/*
 !/_infra/docker-compose.yml
+
+CLAUDE.md

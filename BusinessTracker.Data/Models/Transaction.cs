@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace BusinessTracker.Data.Models;
 
-namespace BusinessTracker.Data.Models;
-
-public partial class Transaction
+public class Transaction
 {
     public Guid Id { get; set; }
 
@@ -22,6 +19,8 @@ public partial class Transaction
     public decimal Quantity { get; set; }
 
     public decimal Discount { get; set; }
+
+    public int PaymentType { get; set; } = 1;
 
     public virtual Employee Employee { get; set; } = null!;
 

@@ -3,6 +3,7 @@ using BusinessTracker.Domain.Core.Enums;
 
 namespace BusinessTracker.Domain.Models;
 
+
 /// <summary>
 /// Модель транзакции.
 /// </summary>
@@ -58,4 +59,9 @@ public class Transaction : DomainModel
     /// </summary>
     [Required]
     public required Employee Employee { get; set; } = null!;
+
+    /// <summary>
+    /// Тип оплаты.
+    /// </summary>
+    public PaymentType PaymentType { get; set; } = PaymentType.Cash;
 }
