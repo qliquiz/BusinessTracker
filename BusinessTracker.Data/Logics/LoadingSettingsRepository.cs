@@ -39,10 +39,19 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
         var ctx = new BusinessTrackerContext();
         var item = ctx.Companies.FirstOrDefault(x => x.Id == organization.Id) ??
                    throw new InvalidDataException($"Organization {organization.Id} not found");
-        var json = !string.IsNullOrEmpty(item.LoadOptions)
-            ? item.LoadOptions
-            : throw new InvalidDataException($"Organization {item.Id} has invalid settings");
-        var result = JsonSerializer.Deserialize<LoadingSettings>(json) ??
+
+        if (string.IsNullOrEmpty(item.LoadOptions))
+        {
+            return Task.FromResult(new LoadingSettings
+            {
+                Owner = organization,
+                Description = "Default settings",
+                StartPosition = 0,
+                BatchSize = 1000
+            });
+        }
+
+        var result = JsonSerializer.Deserialize<LoadingSettings>(item.LoadOptions) ??
                      throw new InvalidDataException($"Organization {organization.Id} not found");
         return Task.FromResult(result);
     }
