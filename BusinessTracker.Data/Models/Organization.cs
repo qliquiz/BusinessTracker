@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 namespace BusinessTracker.Data.Models;
 
-public partial class Company
+public partial class Organization
 {
     public Guid Id { get; set; }
 
-    public string? Inn { get; set; }
+    public string Name { get; set; } = null!;
 
-    public string? Address { get; set; }
+    public string Inn { get; set; } = null!;
+
+    public string Address { get; set; } = null!;
 
     public string? LoadOptions { get; set; }
 
@@ -17,7 +19,7 @@ public partial class Company
 
     public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 
-    public virtual ICollection<LinksUserCompany> LinksUserCompanies { get; set; } = new List<LinksUserCompany>();
+    public virtual ICollection<LinksUserOrganization> LinksUserOrganizations { get; set; } = new List<LinksUserOrganization>();
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

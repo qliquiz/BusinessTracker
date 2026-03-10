@@ -7,11 +7,11 @@ public partial class Category
 {
     public Guid Id { get; set; }
 
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    public Guid? CompanyId { get; set; }
-
-    public virtual Company? Company { get; set; }
+    public Guid OwnerId { get; set; }
 
     public virtual ICollection<Nomenclature> Nomenclatures { get; set; } = new List<Nomenclature>();
+
+    public virtual Organization Owner { get; set; } = null!;
 }

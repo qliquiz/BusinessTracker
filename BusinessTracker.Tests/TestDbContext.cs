@@ -18,7 +18,7 @@ public class TestDbContext
         var ctx = new BusinessTrackerContext();
 
         // Действие
-        var result = await ctx.Companies.ToListAsync(CancellationToken.None);
+        var result = await ctx.Organizations.ToListAsync(CancellationToken.None);
 
         // Проверка
         Assert.That(result, Is.Not.Empty);

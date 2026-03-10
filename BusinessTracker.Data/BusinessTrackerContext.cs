@@ -16,15 +16,13 @@ public partial class BusinessTrackerContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<Company> Companies { get; set; }
-
     public virtual DbSet<Employee> Employees { get; set; }
 
-    public virtual DbSet<LinksUserCompany> LinksUserCompanies { get; set; }
+    public virtual DbSet<LinksUserOrganization> LinksUserOrganizations { get; set; }
 
     public virtual DbSet<Nomenclature> Nomenclatures { get; set; }
 
-    public virtual DbSet<Schemaversion> Schemaversions { get; set; }
+    public virtual DbSet<Organization> Organizations { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
 
@@ -39,159 +37,96 @@ public partial class BusinessTrackerContext : DbContext
     {
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("categories_pkey");
+            entity.HasKey(e => e.Id).HasName("Categories_pkey");
 
-            entity.ToTable("categories");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.Name).HasMaxLength(255);
 
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CompanyId).HasColumnName("company_id");
-            entity.Property(e => e.Name).HasColumnName("name");
-
-            entity.HasOne(d => d.Company).WithMany(p => p.Categories)
-                .HasForeignKey(d => d.CompanyId)
-                .HasConstraintName("categories_company_id_fk");
-        });
-
-        modelBuilder.Entity<Company>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("companies_pkey");
-
-            entity.ToTable("companies");
-
-            entity.HasIndex(e => e.Inn, "company_inn_ix").IsUnique();
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.Address).HasColumnName("address");
-            entity.Property(e => e.Inn).HasColumnName("inn");
-            entity.Property(e => e.LoadOptions)
-                .HasColumnType("jsonb")
-                .HasColumnName("load_options");
+            entity.HasOne(d => d.Owner).WithMany(p => p.Categories)
+                .HasForeignKey(d => d.OwnerId)
+                .HasConstraintName("FK_Categories_Organizations");
         });
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("employees_pkey");
+            entity.HasKey(e => e.Id).HasName("Employees_pkey");
 
-            entity.ToTable("employees");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.Name).HasMaxLength(255);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
 
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CompanyId).HasColumnName("company_id");
-            entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e => e.Phone).HasColumnName("phone");
-
-            entity.HasOne(d => d.Company).WithMany(p => p.Employees)
-                .HasForeignKey(d => d.CompanyId)
-                .HasConstraintName("employees_company_id_fk");
+            entity.HasOne(d => d.Owner).WithMany(p => p.Employees)
+                .HasForeignKey(d => d.OwnerId)
+                .HasConstraintName("FK_Employees_Organizations");
         });
 
-        modelBuilder.Entity<LinksUserCompany>(entity =>
+        modelBuilder.Entity<LinksUserOrganization>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("links_user_company_pkey");
+            entity.HasKey(e => e.Id).HasName("LinksUserOrganizations_pkey");
 
-            entity.ToTable("links_user_company");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
 
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CompanyId).HasColumnName("company_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.HasOne(d => d.Organization).WithMany(p => p.LinksUserOrganizations)
+                .HasForeignKey(d => d.OrganizationId)
+                .HasConstraintName("FK_LinksUserOrganizations_Organizations");
 
-            entity.HasOne(d => d.Company).WithMany(p => p.LinksUserCompanies)
-                .HasForeignKey(d => d.CompanyId)
-                .HasConstraintName("links_user_company_company_id_fk");
-
-            entity.HasOne(d => d.User).WithMany(p => p.LinksUserCompanies)
+            entity.HasOne(d => d.User).WithMany(p => p.LinksUserOrganizations)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("links_user_company_user_id_fk");
+                .HasConstraintName("FK_LinksUserOrganizations_Users");
         });
 
         modelBuilder.Entity<Nomenclature>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("nomenclatures_pkey");
+            entity.HasKey(e => e.Id).HasName("Nomenclatures_pkey");
 
-            entity.ToTable("nomenclatures");
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CategoryId).HasColumnName("category_id");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.Name).HasMaxLength(255);
 
             entity.HasOne(d => d.Category).WithMany(p => p.Nomenclatures)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("nomenclatures_category_id_fk");
+                .HasConstraintName("FK_Nomenclatures_Categories");
         });
 
-        modelBuilder.Entity<Schemaversion>(entity =>
+        modelBuilder.Entity<Organization>(entity =>
         {
-            entity.HasKey(e => e.Schemaversionsid).HasName("PK_schemaversions_Id");
+            entity.HasKey(e => e.Id).HasName("Organizations_pkey");
 
-            entity.ToTable("schemaversions");
+            entity.HasIndex(e => e.Inn, "OrganizationInnIx").IsUnique();
 
-            entity.Property(e => e.Schemaversionsid).HasColumnName("schemaversionsid");
-            entity.Property(e => e.Applied)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("applied");
-            entity.Property(e => e.Scriptname)
-                .HasMaxLength(255)
-                .HasColumnName("scriptname");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.Inn).HasMaxLength(10);
+            entity.Property(e => e.LoadOptions).HasColumnType("jsonb");
+            entity.Property(e => e.Name).HasMaxLength(255);
         });
 
         modelBuilder.Entity<Transaction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("transactions_pkey");
+            entity.HasKey(e => e.Id).HasName("Transactions_pkey");
 
-            entity.ToTable("transactions");
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.ChangePeriod).HasColumnName("change_period");
-            entity.Property(e => e.CompanyId).HasColumnName("company_id");
-            entity.Property(e => e.Discount)
-                .HasPrecision(15, 2)
-                .HasColumnName("discount");
-            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
-            entity.Property(e => e.NomenclatureId).HasColumnName("nomenclature_id");
-            entity.Property(e => e.Price)
-                .HasPrecision(15, 2)
-                .HasColumnName("price");
-            entity.Property(e => e.Quantity)
-                .HasPrecision(15, 2)
-                .HasColumnName("quantity");
-            entity.Property(e => e.TransactionType).HasColumnName("transaction_type");
-
-            entity.HasOne(d => d.Company).WithMany(p => p.Transactions)
-                .HasForeignKey(d => d.CompanyId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("transactions_company_id_fk");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.Amount).HasPrecision(15, 2);
+            entity.Property(e => e.Discount).HasPrecision(15, 2);
+            entity.Property(e => e.Quantity).HasPrecision(15, 2);
 
             entity.HasOne(d => d.Employee).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.EmployeeId)
-                .HasConstraintName("transactions_employee_id_fk");
+                .HasConstraintName("FK_Transactions_Employees");
 
             entity.HasOne(d => d.Nomenclature).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.NomenclatureId)
-                .HasConstraintName("transactions_nomenclature_id_fk");
+                .HasConstraintName("FK_Transactions_Nomenclatures");
+
+            entity.HasOne(d => d.Owner).WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.OwnerId)
+                .HasConstraintName("FK_Transactions_Organizations");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("users_pkey");
+            entity.HasKey(e => e.Id).HasName("Users_pkey");
 
-            entity.ToTable("users");
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e => e.Password).HasColumnName("password");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.Name).HasMaxLength(255);
         });
 
         OnModelCreatingPartial(modelBuilder);

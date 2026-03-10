@@ -19,7 +19,7 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
     {
         var ctx = new BusinessTrackerContext();
         var companyId = loadingSettings.Owner.Id;
-        var company = ctx.Companies.FirstOrDefault(x => x.Id == companyId)
+        var company = ctx.Organizations.FirstOrDefault(x => x.Id == companyId)
                       ?? throw new InvalidDataException($"Organization {companyId} not found");
 
         var text = JsonSerializer.Serialize(loadingSettings);
@@ -37,7 +37,7 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
     public Task<LoadingSettings> Load(Organization organization, CancellationToken cancellationToken)
     {
         var ctx = new BusinessTrackerContext();
-        var item = ctx.Companies.FirstOrDefault(x => x.Id == organization.Id) ??
+        var item = ctx.Organizations.FirstOrDefault(x => x.Id == organization.Id) ??
                    throw new InvalidDataException($"Organization {organization.Id} not found");
 
         if (string.IsNullOrEmpty(item.LoadOptions))

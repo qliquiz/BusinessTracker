@@ -1,101 +1,103 @@
--- Создаем таблицы и индексы
-create table if not exists companies
+-- Creating tables and indexes
+CREATE TABLE IF NOT EXISTS "Organizations"
 (
-    id      uuid not null primary key DEFAULT gen_random_uuid(),
-    inn     text,
-    address text
+    "Id"          UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Name"        VARCHAR(255) NOT NULL,
+    "Inn"         VARCHAR(10)  NOT NULL,
+    "Address"     TEXT         NOT NULL,
+    "LoadOptions" JSONB
 );
 
-create unique index company_inn_ix on companies (inn);
+CREATE UNIQUE INDEX "OrganizationInnIx" ON "Organizations" ("Inn");
 
-create table if not exists categories
+CREATE TABLE IF NOT EXISTS "Categories"
 (
-    id         uuid not null primary key DEFAULT gen_random_uuid(),
-    name       text,
-    company_id uuid
+    "Id"      UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Name"    VARCHAR(255) NOT NULL,
+    "OwnerId" UUID         NOT NULL
 );
 
-create table if not exists employees
+CREATE TABLE IF NOT EXISTS "Employees"
 (
-    id         uuid not null primary key DEFAULT gen_random_uuid(),
-    name       text,
-    phone      text,
-    company_id uuid
+    "Id"          UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Name"        VARCHAR(255) NOT NULL,
+    "PhoneNumber" VARCHAR(20),
+    "OwnerId"     UUID         NOT NULL,
+    "Role"        INT          NOT NULL             DEFAULT 0
 );
 
-create table if not exists nomenclatures
+CREATE TABLE IF NOT EXISTS "Nomenclatures"
 (
-    id          uuid not null primary key DEFAULT gen_random_uuid(),
-    name        text,
-    category_id uuid
+    "Id"         UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Name"       VARCHAR(255) NOT NULL,
+    "CategoryId" UUID         NOT NULL
 );
 
-create table if not exists transactions
+CREATE TABLE IF NOT EXISTS "Transactions"
 (
-    id               uuid                     not null primary key DEFAULT gen_random_uuid(),
-    transaction_type int                      not null,
-    company_id       uuid                     not null,
-    change_period    timestamp with time zone NOT NULL,
-    nomenclature_id  uuid,
-    employee_id      uuid,
-    price            numeric(15, 2),
-    quantity         numeric(15, 2),
-    discount         numeric(15, 2)
+    "Id"              UUID                     NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Type"            INT                      NOT NULL,
+    "OwnerId"         UUID                     NOT NULL,
+    "TransactionDate" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "NomenclatureId"  UUID                     NOT NULL,
+    "EmployeeId"      UUID                     NOT NULL,
+    "Amount"          NUMERIC(15, 2)           NOT NULL,
+    "Quantity"        NUMERIC(15, 2)           NOT NULL,
+    "Discount"        NUMERIC(15, 2)           NOT NULL
 );
 
-create table if not exists users
+CREATE TABLE IF NOT EXISTS "Users"
 (
-    id       uuid not null primary key DEFAULT gen_random_uuid(),
-    name     text,
-    password text
+    "Id"       UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Name"     VARCHAR(255) NOT NULL,
+    "Password" TEXT         NOT NULL
 );
 
-create table if not exists links_user_company
+CREATE TABLE IF NOT EXISTS "LinksUserOrganizations"
 (
-    id         uuid not null primary key DEFAULT gen_random_uuid(),
-    user_id    uuid,
-    company_id uuid
+    "Id"             UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    "UserId"         UUID NOT NULL,
+    "OrganizationId" UUID NOT NULL
 );
 
--- Создаем связи
+-- Creating constraints
 
-alter table links_user_company
-    add constraint links_user_company_user_id_fk
-        foreign key (user_id)
-            references users (id);
+ALTER TABLE "LinksUserOrganizations"
+    ADD CONSTRAINT "FK_LinksUserOrganizations_Users"
+        FOREIGN KEY ("UserId")
+            REFERENCES "Users" ("Id") ON DELETE CASCADE;
 
-alter table links_user_company
-    add constraint links_user_company_company_id_fk
-        foreign key (company_id)
-            references companies (id);
+ALTER TABLE "LinksUserOrganizations"
+    ADD CONSTRAINT "FK_LinksUserOrganizations_Organizations"
+        FOREIGN KEY ("OrganizationId")
+            REFERENCES "Organizations" ("Id") ON DELETE CASCADE;
 
-alter table categories
-    add constraint categories_company_id_fk
-        foreign key (company_id)
-            references companies (id);
+ALTER TABLE "Categories"
+    ADD CONSTRAINT "FK_Categories_Organizations"
+        FOREIGN KEY ("OwnerId")
+            REFERENCES "Organizations" ("Id") ON DELETE CASCADE;
 
+ALTER TABLE "Employees"
+    ADD CONSTRAINT "FK_Employees_Organizations"
+        FOREIGN KEY ("OwnerId")
+            REFERENCES "Organizations" ("Id") ON DELETE CASCADE;
 
-alter table employees
-    add constraint employees_company_id_fk
-        foreign key (company_id)
-            references companies (id);
+ALTER TABLE "Nomenclatures"
+    ADD CONSTRAINT "FK_Nomenclatures_Categories"
+        FOREIGN KEY ("CategoryId")
+            REFERENCES "Categories" ("Id") ON DELETE CASCADE;
 
-alter table nomenclatures
-    add constraint nomenclatures_category_id_fk
-        foreign key (category_id)
-            references categories (id);
+ALTER TABLE "Transactions"
+    ADD CONSTRAINT "FK_Transactions_Organizations"
+        FOREIGN KEY ("OwnerId")
+            REFERENCES "Organizations" ("Id") ON DELETE CASCADE;
 
-alter table transactions
-    add constraint transactions_company_id_fk
-        foreign key (company_id)
-            references companies (id);
+ALTER TABLE "Transactions"
+    ADD CONSTRAINT "FK_Transactions_Nomenclatures"
+        FOREIGN KEY ("NomenclatureId")
+            REFERENCES "Nomenclatures" ("Id") ON DELETE CASCADE;
 
-alter table transactions
-    add constraint transactions_nomenclature_id_fk
-        foreign key (nomenclature_id)
-            references nomenclatures (id);
-
-alter table transactions
-    add constraint transactions_employee_id_fk
-        foreign key (employee_id)
-            references employees (id);
+ALTER TABLE "Transactions"
+    ADD CONSTRAINT "FK_Transactions_Employees"
+        FOREIGN KEY ("EmployeeId")
+            REFERENCES "Employees" ("Id") ON DELETE CASCADE;

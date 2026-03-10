@@ -7,9 +7,9 @@ public partial class User
 {
     public Guid Id { get; set; }
 
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    public string? Password { get; set; }
+    public string Password { get; set; } = null!;
 
-    public virtual ICollection<LinksUserCompany> LinksUserCompanies { get; set; } = new List<LinksUserCompany>();
+    public virtual ICollection<LinksUserOrganization> LinksUserOrganizations { get; set; } = new List<LinksUserOrganization>();
 }
