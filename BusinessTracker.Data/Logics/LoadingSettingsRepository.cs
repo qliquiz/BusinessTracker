@@ -17,7 +17,7 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
     /// <exception cref="InvalidDataException">The exception that is thrown when a data stream is in an invalid format.</exception>
     public async Task Save(LoadingSettings loadingSettings, CancellationToken cancellationToken)
     {
-        var ctx = new BusinessTrackerContext();
+        await using var ctx = new BusinessTrackerContext();
         var companyId = loadingSettings.Owner.Id;
         var company = ctx.Organizations.FirstOrDefault(x => x.Id == companyId)
                       ?? throw new InvalidDataException($"Organization {companyId} not found");
@@ -36,7 +36,7 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
     /// <exception cref="InvalidDataException">The exception that is thrown when a data stream is in an invalid format.</exception>
     public Task<LoadingSettings> Load(Organization organization, CancellationToken cancellationToken)
     {
-        var ctx = new BusinessTrackerContext();
+        using var ctx = new BusinessTrackerContext();
         var item = ctx.Organizations.FirstOrDefault(x => x.Id == organization.Id) ??
                    throw new InvalidDataException($"Organization {organization.Id} not found");
 
@@ -52,7 +52,8 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
         }
 
         var result = JsonSerializer.Deserialize<LoadingSettings>(item.LoadOptions) ??
-                     throw new InvalidDataException($"Organization {organization.Id} not found");
+                     throw new InvalidDataException(
+                         $"Failed to deserialize settings for organization {organization.Id}");
         return Task.FromResult(result);
     }
 }

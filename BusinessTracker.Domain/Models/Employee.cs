@@ -23,7 +23,7 @@ public class Employee : DomainModel
     public string? PhoneNumber { get; set; }
 
     /// <summary>
-    /// Организация владелец категории.
+    /// Организация-владелец сотрудника.
     /// </summary>
     [Required]
     public Organization Owner { get; set; } = null!;

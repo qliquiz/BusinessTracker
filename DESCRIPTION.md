@@ -24,10 +24,10 @@ BusinessTracker.Tests         ← Тесты (NUnit 4)
 | Папка                | Содержимое                                                                                                                                                              |
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Core/Abstractions/` | Интерфейсы (`ILoadingSettingsRepository`, `IRevenueReportRepository`, `ISalesReportRepository`, `IWorkScheduleReportRepository`, `IModel`, `IId`, `IDto`, `IErrorText`) |
-| `Core/Enums/`        | `TransactionType`, `EmployeeRole`, `PaymentType`                                                                                                                        |
+| `Core/Enums/`        | `TransactionType`, `EmployeeRole`                                                                                                                                       |
 | `Core/Attributes/`   | `TemplateAttribute` (regex-валидация), `ColumnMappingAttribute` (маппинг из ADO.NET)                                                                                    |
 | `Models/`            | `DomainModel` (базовый класс с самовалидацией), `Organization`, `Employee`, `Category`, `Nomenclature`, `Transaction`, `LoadingSettings`                                |
-| `Models/Dto/`        | `JournalRawDto`, `RevenueReportRowDto`, `SalesReportRowDto`, `WorkScheduleReportRowDto`                                                                                 |
+| `Models/Dto/`        | `JournalRowDto`, `RevenueReportRowDto`, `SalesReportRowDto`, `WorkScheduleReportRowDto`                                                                                 |
 | `Logic/`             | `RevenueReportBuilder`, `SalesReportBuilder`, `WorkScheduleReportBuilder`, `DataMapper`, `ValidationHelper`                                                             |
 
 **Самовалидация** — `DomainModel.Validate()` рекурсивно проверяет:
@@ -38,22 +38,19 @@ BusinessTracker.Tests         ← Тесты (NUnit 4)
 
 **Построители отчётов** — статические классы. Принимают `IEnumerable<Transaction>` и возвращают Dto:
 
-| Построитель                 | Логика                                                                                             |
-|-----------------------------|----------------------------------------------------------------------------------------------------|
-| `RevenueReportBuilder`      | Группировка по дате, разбивка по `PaymentType` (Cash/NonCash/Other), флаг `IsHoliday` для выходных |
-| `SalesReportBuilder`        | Группировка по номенклатуре, суммирование `Quantity`/`Amount`/`Discount`                           |
-| `WorkScheduleReportBuilder` | Сопоставление `StartShift` и `StopShift` по сотруднику, незакрытая смена — `ShiftEnd = null`       |
+| Построитель                 | Логика                                                                                                                           |
+|-----------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| `RevenueReportBuilder`      | Группировка по дате; вся сумма попадает в `CashAmount` (разбивка по типу оплаты будет реализована после интеграции MSSQL-данных) |
+| `SalesReportBuilder`        | Группировка по номенклатуре, суммирование `Quantity`/`Amount`/`Discount`                                                         |
+| `WorkScheduleReportBuilder` | Сопоставление `StartShift` и `StopShift` по сотруднику, незакрытая смена — `ShiftEnd = null`                                     |
 
 ### Слой Data (`BusinessTracker.Data`)
 
-| Папка         | Содержимое                                                                                                                      |
-|---------------|---------------------------------------------------------------------------------------------------------------------------------|
-| `Models/`     | EF-сущности (зеркало таблиц БД)                                                                                                 |
-| `Logics/`     | `LoadingSettingsRepository`, `RevenueReportRepository`, `SalesReportRepository`, `WorkScheduleReportRepository`, `DomainMapper` |
-| `Migrations/` | SQL-скрипты DbUp                                                                                                                |
-
-`DomainMapper` — внутренний маппер EF-сущностей в доменные модели. Репозитории отчётов: загружают данные через EF Core →
-маппят в домен → вызывают построитель.
+| Папка         | Содержимое                      |
+|---------------|---------------------------------|
+| `Models/`     | EF-сущности (зеркало таблиц БД) |
+| `Logics/`     | `LoadingSettingsRepository`     |
+| `Migrations/` | SQL-скрипты DbUp                |
 
 ---
 
@@ -104,7 +101,6 @@ erDiagram
     Transactions {
         UUID Id PK
         INT Type
-        INT PaymentType
         UUID OwnerId FK
         TIMESTAMPTZ TransactionDate
         UUID NomenclatureId FK
@@ -136,14 +132,6 @@ erDiagram
 | StartShift | 4   | Начало смены    |
 | StopShift  | 5   | Окончание смены |
 
-**`PaymentType`**
-
-| Значение | Код | Описание    |
-|----------|-----|-------------|
-| Cash     | 1   | Наличные    |
-| NonCash  | 2   | Безналичные |
-| Other    | 3   | Прочее      |
-
 **`EmployeeRole`**
 
 | Значение      | Описание                 |
@@ -158,11 +146,10 @@ erDiagram
 Используется **DbUp** — миграции применяются при старте `BusinessTracker.Api`.
 Скрипты хранятся как Embedded Resources в `BusinessTracker.Data/Migrations/` и выполняются в алфавитном порядке:
 
-| Скрипт                        | Описание                                                                   |
-|-------------------------------|----------------------------------------------------------------------------|
-| `init.sql`                    | Создание всех таблиц и индексов                                            |
-| `seed_init.sql`               | Начальные данные (2 организации, 1 сотрудник, 1 категория, 1 номенклатура) |
-| `upgrade_add_paymenttype.sql` | Добавление колонки `PaymentType` в `Transactions`                          |
+| Скрипт          | Описание                                                                   |
+|-----------------|----------------------------------------------------------------------------|
+| `init.sql`      | Создание всех таблиц и индексов                                            |
+| `seed_init.sql` | Начальные данные (2 организации, 1 сотрудник, 1 категория, 1 номенклатура) |
 
 ### Шаги для первоначального развёртывания БД
 

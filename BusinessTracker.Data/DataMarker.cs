@@ -1,6 +1,6 @@
 namespace BusinessTracker.Data;
 
 /// <summary>
-/// Marker class for module BusinessTracker.Data.
+/// Класс-маркер для модуля BusinessTracker.Data.
 /// </summary>
 public class DataMarker;

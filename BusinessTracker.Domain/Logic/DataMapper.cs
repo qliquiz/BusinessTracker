@@ -10,6 +10,12 @@ namespace BusinessTracker.Domain.Logic;
 /// </summary>
 public static class DataMapper
 {
+    // Наименования типов транзакций в legacy MSSQL-журнале
+    private const string TransTypePos = "POS";
+    private const string TransTypePluSales = "PLU Sales";
+    private const string TransTypeStartShift = "Начало работы";
+    private const string TransTypeStopShift = "Окончание работы";
+
     /// <summary>
     /// Маппинг одной строки данных в объект DTO.
     /// </summary>
@@ -60,13 +66,13 @@ public static class DataMapper
 
             switch (dto.TransTypeName)
             {
-                case "POS":
-                case "PLU Sales":
+                case TransTypePos:
+                case TransTypePluSales:
                     dto.ProductCode = dto.RawId;
                     break;
 
-                case "Начало работы":
-                case "Окончание работы":
+                case TransTypeStartShift:
+                case TransTypeStopShift:
                     dto.EmployeeCode ??= dto.RawId;
                     break;
             }

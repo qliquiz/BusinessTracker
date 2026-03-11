@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-
 namespace BusinessTracker.Data.Models;
 
-public partial class Category
+/// <summary>
+/// EF-сущность категории номенклатуры.
+/// </summary>
+public class Category
 {
+    /// <summary>Уникальный идентификатор.</summary>
     public Guid Id { get; set; }
 
+    /// <summary>Наименование.</summary>
     public string Name { get; set; } = null!;
 
+    /// <summary>Идентификатор организации-владельца.</summary>
     public Guid OwnerId { get; set; }
 
     public virtual ICollection<Nomenclature> Nomenclatures { get; set; } = new List<Nomenclature>();

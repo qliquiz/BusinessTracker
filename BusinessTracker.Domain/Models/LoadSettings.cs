@@ -27,7 +27,7 @@ public class LoadingSettings : DomainModel
     public long StartPosition { get; set; }
 
     /// <summary>
-    /// Размер.
+    /// Размер пакета данных для одной загрузки (количество записей).
     /// </summary>
     [Required]
     public long BatchSize { get; set; } = 1000;

@@ -3,12 +3,22 @@ using BusinessTracker.Data.Models;
 
 namespace BusinessTracker.Data;
 
+/// <summary>
+/// Контекст базы данных PostgreSQL для приложения BusinessTracker.
+/// </summary>
 public partial class BusinessTrackerContext : DbContext
 {
+    /// <summary>
+    /// Инициализирует контекст с параметрами по умолчанию (подключение из <see cref="OnConfiguring"/>).
+    /// </summary>
     public BusinessTrackerContext()
     {
     }
 
+    /// <summary>
+    /// Инициализирует контекст с явно переданными параметрами подключения.
+    /// </summary>
+    /// <param name="options">Параметры DbContext.</param>
     public BusinessTrackerContext(DbContextOptions<BusinessTrackerContext> options)
         : base(options)
     {
