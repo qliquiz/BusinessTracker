@@ -23,6 +23,7 @@ public class TemplateAttribute : ValidationAttribute
         Template = template ?? throw new ArgumentNullException(nameof(template));
     }
 
+    /// <inheritdoc/>
     public override bool IsValid(object? value)
     {
         return value switch
@@ -33,6 +34,7 @@ public class TemplateAttribute : ValidationAttribute
         };
     }
 
+    /// <inheritdoc/>
     public override string FormatErrorMessage(string name)
     {
         return $"Поле {name} должно соответствовать формату: {Template}";

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
-/// Модель категории номераклатуры.
+/// Модель категории номенклатуры.
 /// </summary>
 public class Category : DomainModel
 {

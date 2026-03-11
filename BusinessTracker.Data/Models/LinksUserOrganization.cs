@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-
 namespace BusinessTracker.Data.Models;
 
-public partial class LinksUserOrganization
+/// <summary>
+/// EF-сущность связи пользователя с организацией.
+/// </summary>
+public class LinksUserOrganization
 {
+    /// <summary>Уникальный идентификатор.</summary>
     public Guid Id { get; set; }
 
+    /// <summary>Идентификатор пользователя.</summary>
     public Guid UserId { get; set; }
 
+    /// <summary>Идентификатор организации.</summary>
     public Guid OrganizationId { get; set; }
 
     public virtual Organization Organization { get; set; } = null!;

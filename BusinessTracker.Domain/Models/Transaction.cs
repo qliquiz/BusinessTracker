@@ -58,4 +58,5 @@ public class Transaction : DomainModel
     /// </summary>
     [Required]
     public required Employee Employee { get; set; } = null!;
+
 }
