@@ -95,13 +95,11 @@ public class TestSalesReportBuilder
             MakeTransaction(TransactionType.Sale, _milk, 80m)
         };
 
-        var report = SalesReportBuilder.Build(transactions).ToList();
-
-        Assert.That(report, Has.Count.EqualTo(2));
+        Assert.That(SalesReportBuilder.Build(transactions).Count(), Is.EqualTo(2));
     }
 
     /// <summary>
-    /// Возвраты включаются в отчёт наравне с продажами.
+    /// Возвраты включаются в отчёт наравне с продажами (суммирование валовое).
     /// </summary>
     [Test]
     public void Build_ReturnIncludedInReport()
@@ -132,7 +130,6 @@ public class TestSalesReportBuilder
         {
             Id = Guid.NewGuid(),
             Type = type,
-            PaymentType = PaymentType.Cash,
             Amount = amount,
             Discount = discount,
             Quantity = quantity,

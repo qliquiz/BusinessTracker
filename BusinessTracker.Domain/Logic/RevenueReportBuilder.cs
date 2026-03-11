@@ -14,9 +14,20 @@ public static class RevenueReportBuilder
 
     /// <summary>
     /// Сформировать отчёт. Группировка — по дате (один день = одна строка).
-    /// Выходные и праздники помечаются флагом <see cref="RevenueReportRowDto.IsHoliday"/>.
+    /// <para>
+    /// Разбивка по типам оплаты (наличные / безналичные / прочее) будет реализована
+    /// после интеграции полной таблицы типов транзакций из MSSQL-журнала (transtype).
+    /// На данный момент вся сумма попадает в <see cref="RevenueReportRowDto.CashAmount"/>.
+    /// </para>
     /// </summary>
-    public static IEnumerable<RevenueReportRowDto> Build(IEnumerable<Transaction> transactions)
+    /// <param name="transactions">Набор доменных транзакций.</param>
+    /// <param name="holidays">
+    /// Набор дат, считающихся праздничными (выходные, государственные праздники и т.д.).
+    /// Если не передан — <see cref="RevenueReportRowDto.IsHoliday"/> всегда <c>false</c>.
+    /// </param>
+    public static IEnumerable<RevenueReportRowDto> Build(
+        IEnumerable<Transaction> transactions,
+        IReadOnlySet<DateOnly>? holidays = null)
     {
         return transactions
             .Where(t => RevenueTypes.Contains(t.Type))
@@ -24,17 +35,11 @@ public static class RevenueReportBuilder
             .Select(g => new RevenueReportRowDto
             {
                 Period = g.Key,
-                CashAmount = g
-                    .Where(t => t.PaymentType == PaymentType.Cash)
-                    .Sum(t => t.Amount),
-                NonCashAmount = g
-                    .Where(t => t.PaymentType == PaymentType.NonCash)
-                    .Sum(t => t.Amount),
-                OtherAmount = g
-                    .Where(t => t.PaymentType == PaymentType.Other)
-                    .Sum(t => t.Amount),
+                CashAmount = g.Sum(t => t.Amount),
+                NonCashAmount = 0m,
+                OtherAmount = 0m,
                 DiscountAmount = g.Sum(t => t.Discount),
-                IsHoliday = g.Key.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday,
+                IsHoliday = holidays?.Contains(g.Key) ?? false,
                 OrganizationId = g.First().Owner.Id
             });
     }

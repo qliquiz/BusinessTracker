@@ -20,8 +20,6 @@ public class Transaction
 
     public decimal Discount { get; set; }
 
-    public int PaymentType { get; set; } = 1;
-
     public virtual Employee Employee { get; set; } = null!;
 
     public virtual Nomenclature Nomenclature { get; set; } = null!;

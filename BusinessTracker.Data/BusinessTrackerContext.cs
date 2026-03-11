@@ -107,7 +107,6 @@ public partial class BusinessTrackerContext : DbContext
             entity.Property(e => e.Amount).HasPrecision(15, 2);
             entity.Property(e => e.Discount).HasPrecision(15, 2);
             entity.Property(e => e.Quantity).HasPrecision(15, 2);
-            entity.Property(e => e.PaymentType).HasDefaultValue(1);
 
             entity.HasOne(d => d.Employee).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.EmployeeId)

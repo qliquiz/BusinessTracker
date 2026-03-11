@@ -34,9 +34,7 @@ public class TestRevenueReportBuilder
     [Test]
     public void Build_EmptyTransactions_ReturnsEmpty()
     {
-        var report = RevenueReportBuilder.Build([]);
-
-        Assert.That(report, Is.Empty);
+        Assert.That(RevenueReportBuilder.Build([]), Is.Empty);
     }
 
     /// <summary>
@@ -47,24 +45,22 @@ public class TestRevenueReportBuilder
     {
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.StartShift, 0.01m, PaymentType.Cash),
-            MakeTransaction(TransactionType.StopShift, 0.01m, PaymentType.Cash)
+            MakeTransaction(TransactionType.StartShift, 0.01m),
+            MakeTransaction(TransactionType.StopShift, 0.01m)
         };
 
-        var report = RevenueReportBuilder.Build(transactions);
-
-        Assert.That(report, Is.Empty);
+        Assert.That(RevenueReportBuilder.Build(transactions), Is.Empty);
     }
 
     /// <summary>
-    /// Одна продажа наличными — корректно попадает в CashAmount.
+    /// Продажа попадает в отчёт с корректной суммой.
     /// </summary>
     [Test]
-    public void Build_SingleCashSale_CashAmountCorrect()
+    public void Build_SingleSale_AmountCorrect()
     {
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, 100m, PaymentType.Cash, discount: 10m,
+            MakeTransaction(TransactionType.Sale, 100m, discount: 10m,
                 date: new DateTimeOffset(2025, 3, 10, 12, 0, 0, TimeSpan.Zero))
         };
 
@@ -74,8 +70,6 @@ public class TestRevenueReportBuilder
         {
             Assert.That(report, Has.Count.EqualTo(1));
             Assert.That(report[0].CashAmount, Is.EqualTo(100m));
-            Assert.That(report[0].NonCashAmount, Is.EqualTo(0m));
-            Assert.That(report[0].OtherAmount, Is.EqualTo(0m));
             Assert.That(report[0].DiscountAmount, Is.EqualTo(10m));
             Assert.That(report[0].OrganizationId, Is.EqualTo(_org.Id));
         });
@@ -90,9 +84,9 @@ public class TestRevenueReportBuilder
         var date = new DateTimeOffset(2025, 3, 10, 0, 0, 0, TimeSpan.Zero);
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, 200m, PaymentType.Cash, date: date),
-            MakeTransaction(TransactionType.Sale, 300m, PaymentType.NonCash, date: date.AddHours(2)),
-            MakeTransaction(TransactionType.Return, 50m, PaymentType.Cash, date: date.AddHours(4))
+            MakeTransaction(TransactionType.Sale, 200m, date: date),
+            MakeTransaction(TransactionType.Sale, 300m, date: date.AddHours(2)),
+            MakeTransaction(TransactionType.Return, 50m, date: date.AddHours(4))
         };
 
         var report = RevenueReportBuilder.Build(transactions).ToList();
@@ -100,8 +94,7 @@ public class TestRevenueReportBuilder
         Assert.Multiple(() =>
         {
             Assert.That(report, Has.Count.EqualTo(1));
-            Assert.That(report[0].CashAmount, Is.EqualTo(250m));
-            Assert.That(report[0].NonCashAmount, Is.EqualTo(300m));
+            Assert.That(report[0].CashAmount, Is.EqualTo(550m));
         });
     }
 
@@ -113,46 +106,62 @@ public class TestRevenueReportBuilder
     {
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, 100m, PaymentType.Cash,
+            MakeTransaction(TransactionType.Sale, 100m,
                 date: new DateTimeOffset(2025, 3, 10, 12, 0, 0, TimeSpan.Zero)),
-            MakeTransaction(TransactionType.Sale, 200m, PaymentType.Cash,
+            MakeTransaction(TransactionType.Sale, 200m,
                 date: new DateTimeOffset(2025, 3, 11, 12, 0, 0, TimeSpan.Zero))
         };
 
-        var report = RevenueReportBuilder.Build(transactions).ToList();
-
-        Assert.That(report, Has.Count.EqualTo(2));
+        Assert.That(RevenueReportBuilder.Build(transactions).Count(), Is.EqualTo(2));
     }
 
     /// <summary>
-    /// Выходной день помечается флагом IsHoliday = true.
+    /// День из переданного набора праздников помечается IsHoliday = true.
     /// </summary>
     [Test]
-    public void Build_SaturdayTransaction_IsHolidayTrue()
+    public void Build_DateInHolidaySet_IsHolidayTrue()
     {
-        // 2025-03-08 — суббота
-        var saturday = new DateTimeOffset(2025, 3, 8, 12, 0, 0, TimeSpan.Zero);
+        var date = new DateOnly(2025, 1, 1); // Новый год
+        var holidays = new HashSet<DateOnly> { date };
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, 100m, PaymentType.Cash, date: saturday)
+            MakeTransaction(TransactionType.Sale, 100m,
+                date: new DateTimeOffset(date.Year, date.Month, date.Day, 12, 0, 0, TimeSpan.Zero))
         };
 
-        var report = RevenueReportBuilder.Build(transactions).ToList();
+        var report = RevenueReportBuilder.Build(transactions, holidays).ToList();
 
         Assert.That(report[0].IsHoliday, Is.True);
     }
 
     /// <summary>
-    /// Рабочий день не помечается как праздник.
+    /// День не из набора праздников — IsHoliday = false.
     /// </summary>
     [Test]
-    public void Build_WeekdayTransaction_IsHolidayFalse()
+    public void Build_DateNotInHolidaySet_IsHolidayFalse()
     {
-        // 2025-03-10 — понедельник
-        var monday = new DateTimeOffset(2025, 3, 10, 12, 0, 0, TimeSpan.Zero);
+        var holidays = new HashSet<DateOnly> { new(2025, 1, 1) };
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, 100m, PaymentType.Cash, date: monday)
+            MakeTransaction(TransactionType.Sale, 100m,
+                date: new DateTimeOffset(2025, 3, 10, 12, 0, 0, TimeSpan.Zero))
+        };
+
+        var report = RevenueReportBuilder.Build(transactions, holidays).ToList();
+
+        Assert.That(report[0].IsHoliday, Is.False);
+    }
+
+    /// <summary>
+    /// Без переданного набора праздников IsHoliday всегда false.
+    /// </summary>
+    [Test]
+    public void Build_NoHolidaysProvided_IsHolidayAlwaysFalse()
+    {
+        var transactions = new[]
+        {
+            MakeTransaction(TransactionType.Sale, 100m,
+                date: new DateTimeOffset(2025, 3, 8, 12, 0, 0, TimeSpan.Zero)) // воскресенье
         };
 
         var report = RevenueReportBuilder.Build(transactions).ToList();
@@ -163,14 +172,12 @@ public class TestRevenueReportBuilder
     private Transaction MakeTransaction(
         TransactionType type,
         decimal amount,
-        PaymentType paymentType,
         decimal discount = 0m,
         DateTimeOffset? date = null) =>
         new()
         {
             Id = Guid.NewGuid(),
             Type = type,
-            PaymentType = paymentType,
             Amount = amount,
             Discount = discount,
             Quantity = 1m,
