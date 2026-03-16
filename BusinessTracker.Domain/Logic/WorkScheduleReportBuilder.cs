@@ -73,4 +73,72 @@ public static class WorkScheduleReportBuilder
 
         return result;
     }
+
+    /// <summary>
+    /// Оптимизированная версия: один проход для сбора событий, одна глобальная сортировка,
+    /// <see cref="Dictionary{TKey,TValue}"/> вместо LINQ <c>GroupBy</c>.
+    /// Исключает N сортировок (по одной на каждого сотрудника) и промежуточные <c>IGrouping</c>.
+    /// </summary>
+    public static IEnumerable<WorkScheduleReportRowDto> BuildOptimized(IEnumerable<Transaction> transactions)
+    {
+        var result = new List<WorkScheduleReportRowDto>();
+
+        // Сбор событий смен одним проходом
+        var shiftEvents = new List<Transaction>();
+        foreach (var t in transactions)
+        {
+            if (t.Type is TransactionType.StartShift or TransactionType.StopShift)
+                shiftEvents.Add(t);
+        }
+
+        // Одна глобальная сортировка вместо OrderBy внутри каждой группы
+        shiftEvents.Sort((a, b) => a.TransactionDate.CompareTo(b.TransactionDate));
+
+        // Dictionary вместо GroupBy — без промежуточных объектов
+        var stateByEmployee = new Dictionary<Guid, (Employee Emp, Organization Org, Queue<DateTimeOffset> Opens)>();
+
+        foreach (var ev in shiftEvents)
+        {
+            var empId = ev.Employee.Id;
+            if (!stateByEmployee.TryGetValue(empId, out var state))
+            {
+                state = (ev.Employee, ev.Owner, new Queue<DateTimeOffset>());
+                stateByEmployee[empId] = state;
+            }
+
+            if (ev.Type == TransactionType.StartShift)
+            {
+                state.Opens.Enqueue(ev.TransactionDate);
+            }
+            else // StopShift
+            {
+                if (!state.Opens.TryDequeue(out var shiftStart))
+                    continue; // осиротевший StopShift — пропускаем
+
+                result.Add(new WorkScheduleReportRowDto
+                {
+                    EmployeeId = empId,
+                    EmployeeName = state.Emp.Name,
+                    ShiftStart = shiftStart,
+                    ShiftEnd = ev.TransactionDate,
+                    OrganizationId = state.Org.Id
+                });
+            }
+        }
+
+        // Незакрытые смены
+        foreach (var (empId, state) in stateByEmployee)
+        {
+            result.AddRange(state.Opens.Select(shiftStart => new WorkScheduleReportRowDto
+            {
+                EmployeeId = empId,
+                EmployeeName = state.Emp.Name,
+                ShiftStart = shiftStart,
+                ShiftEnd = null,
+                OrganizationId = state.Org.Id
+            }));
+        }
+
+        return result;
+    }
 }
