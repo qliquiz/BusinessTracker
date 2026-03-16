@@ -43,4 +43,47 @@ public static class RevenueReportBuilder
                 OrganizationId = g.First().Owner.Id
             });
     }
+
+    /// <summary>
+    /// Оптимизированная версия: один проход по коллекции через <see cref="Dictionary{TKey,TValue}"/>.
+    /// Исключает создание промежуточных объектов <c>IGrouping</c> и повторные проходы
+    /// по каждой группе при вычислении сумм.
+    /// </summary>
+    /// <param name="transactions">Набор доменных транзакций.</param>
+    /// <param name="holidays">
+    /// Набор дат, считающихся праздничными.
+    /// Если не передан — <see cref="RevenueReportRowDto.IsHoliday"/> всегда <c>false</c>.
+    /// </param>
+    public static IEnumerable<RevenueReportRowDto> BuildOptimized(
+        IEnumerable<Transaction> transactions,
+        IReadOnlySet<DateOnly>? holidays = null)
+    {
+        // (cash, discount, orgId) накапливаются без создания промежуточных коллекций
+        var groups = new Dictionary<DateOnly, (decimal Cash, decimal Discount, Guid OrgId)>();
+
+        foreach (var t in transactions)
+        {
+            if (!RevenueTypes.Contains(t.Type)) continue;
+
+            var date = DateOnly.FromDateTime(t.TransactionDate.LocalDateTime);
+            if (groups.TryGetValue(date, out var acc))
+                groups[date] = (acc.Cash + t.Amount, acc.Discount + t.Discount, acc.OrgId);
+            else
+                groups[date] = (t.Amount, t.Discount, t.Owner.Id);
+        }
+
+        foreach (var (date, acc) in groups)
+        {
+            yield return new RevenueReportRowDto
+            {
+                Period = date,
+                CashAmount = acc.Cash,
+                NonCashAmount = 0m,
+                OtherAmount = 0m,
+                DiscountAmount = acc.Discount,
+                IsHoliday = holidays?.Contains(date) ?? false,
+                OrganizationId = acc.OrgId
+            };
+        }
+    }
 }
