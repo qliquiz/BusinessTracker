@@ -83,6 +83,21 @@ public class JournalRowDto : IDto
     [ColumnMapping("loginid")]
     public int RawLoginId { get; set; }
 
+    /// <summary>
+    /// Имя сотрудника.
+    /// </summary>
+    public string EmployeeName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Наименование категории.
+    /// </summary>
+    public string CategoryName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Наименование номенклатуры.
+    /// </summary>
+    public string NomenclatureName { get; set; } = string.Empty;
+
     /// <inheritdoc/>
     public override string ToString() =>
         $"{Period}: Транзакция — {Quantity * Price}, Тип: {TransTypeName}, Продукт: {ProductCode}, Сотрудник: {EmployeeCode}";

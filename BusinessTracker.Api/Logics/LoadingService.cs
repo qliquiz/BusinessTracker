@@ -8,19 +8,17 @@ namespace BusinessTracker.Api.Logics;
 /// <summary>
 /// Сервис обработки транзакций, поступающих от клиентского приложения.
 /// </summary>
-public class LoadingService : ILoadingService
+public class LoadingService(
+    ILoadingSettingsRepository settingsRepository,
+    IJournalRowsRepository journalRowsRepository)
+    : ILoadingService
 {
-    private readonly ILoadingSettingsRepository _settingsRepository;
-
-    public LoadingService(ILoadingSettingsRepository settingsRepository)
-        => _settingsRepository = settingsRepository;
-
     public bool Push(Organization organization, IEnumerable<JournalRowDto> transactions, CancellationToken token)
     {
         LoadingSettings settings;
         try
         {
-            settings = _settingsRepository.Load(organization, token).Result;
+            settings = settingsRepository.Load(organization, token).Result;
         }
         catch
         {
@@ -40,13 +38,15 @@ public class LoadingService : ILoadingService
         if (innerTransactions.Count == 0) return false;
 
         var lastCode = innerTransactions.Max(x => x.Code);
-        settings.StartPosition = lastCode;
+        settings.StartPosition = lastCode + 1;
 
-        Task.Run(() => _settingsRepository.Save(settings, token), token).Wait(token);
+        Task.Run(() => settingsRepository.Save(settings, token), token).Wait(token);
+        Task.Run(() => journalRowsRepository.SaveAsync(organization.Id, innerTransactions, token), token).Wait(token);
 
         return true;
     }
 
-    public async Task<bool> PushAsync(Organization organization, IEnumerable<JournalRowDto> transactions, CancellationToken token)
+    public async Task<bool> PushAsync(Organization organization, IEnumerable<JournalRowDto> transactions,
+        CancellationToken token)
         => await Task.Run(() => Push(organization, transactions, token), token);
 }

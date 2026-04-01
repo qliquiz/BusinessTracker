@@ -38,6 +38,8 @@ public partial class BusinessTrackerContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<JournalRow> JournalRows { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -139,6 +141,22 @@ public partial class BusinessTrackerContext : DbContext
 
             entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.Name).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<JournalRow>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("JournalRows_pkey");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.TransTypeName).HasDefaultValue(string.Empty);
+            entity.Property(e => e.EmployeeName).HasDefaultValue(string.Empty);
+            entity.Property(e => e.CategoryName).HasDefaultValue(string.Empty);
+            entity.Property(e => e.NomenclatureName).HasDefaultValue(string.Empty);
+            entity.Property(e => e.Period).HasColumnType("timestamp without time zone");
+
+            entity.HasOne(d => d.Owner).WithMany()
+                .HasForeignKey(d => d.OrganizationId)
+                .HasConstraintName("FK_JournalRows_Organizations");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -11,17 +11,31 @@ namespace BusinessTracker.Data.Extensions;
 /// </summary>
 public static class RegistryExtension
 {
+    private const string DefaultConnectionString =
+        "User ID=admin;Password=123456;Host=localhost;Port=5433;Database=business_tracker;";
+
+    /// <summary>
+    /// Регистрация с чтением строки подключения из <see cref="IConfiguration"/>.
+    /// </summary>
     public static IServiceCollection RegisterBusinessTrackerData(
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton<ILoadingSettingsRepository, LoadingSettingsRepository>();
-
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "User ID=admin;Password=123456;Host=localhost;Port=5433;Database=business_tracker;";
+                               ?? DefaultConnectionString;
+        return services.RegisterBusinessTrackerData(connectionString);
+    }
 
-        services.AddDbContext<BusinessTrackerContext>(
-            x => x.UseNpgsql(connectionString));
+    /// <summary>
+    /// Регистрация с явной передачей строки подключения (проброс из модели настроек).
+    /// </summary>
+    public static IServiceCollection RegisterBusinessTrackerData(
+        this IServiceCollection services,
+        string connectionString)
+    {
+        services.AddDbContext<BusinessTrackerContext>(x => x.UseNpgsql(connectionString));
+        services.AddScoped<ILoadingSettingsRepository, LoadingSettingsRepository>();
+        services.AddScoped<IJournalRowsRepository, JournalRowsRepository>();
 
         return services;
     }

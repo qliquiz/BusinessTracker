@@ -1,31 +1,55 @@
-using BusinessTracker.Data.Logics;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using BusinessTracker.Data.Extensions;
+using BusinessTracker.Domain.Core.Abstractions;
 using BusinessTracker.Domain.Models;
 
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Интеграционные тесты для <see cref="LoadingSettingsRepository"/>.
+/// Интеграционные тесты для <see cref="ILoadingSettingsRepository"/>.
 /// Требуют запущенной БД (docker-compose up).
 /// </summary>
 public class TestLoadingSettings
 {
-    // Фиксированный Id из seed_init.sql — Главный офис (Спб)
     private static readonly Guid SeedOrgId = new("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
-    private LoadingSettingsRepository _repo = null!;
+    private ServiceProvider _provider = null!;
     private Organization _org = null!;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        _provider = new ServiceCollection()
+            .RegisterBusinessTrackerData(configuration)
+            .BuildServiceProvider();
+    }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown() => _provider.Dispose();
 
     [SetUp]
     public void SetUp()
     {
-        _repo = new LoadingSettingsRepository();
         _org = new Organization
         {
-            Id = SeedOrgId,
-            Name = "Главный офис (Спб)",
-            Inn = "1234567890",
+            Id      = SeedOrgId,
+            Name    = "Главный офис (Спб)",
+            Inn     = "1234567890",
             Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
         };
+    }
+
+    private ILoadingSettingsRepository GetRepo()
+    {
+        var scope = _provider.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<ILoadingSettingsRepository>();
     }
 
     /// <summary>
@@ -36,7 +60,7 @@ public class TestLoadingSettings
     {
         Assert.DoesNotThrowAsync(async () =>
         {
-            var result = await _repo.Load(_org, CancellationToken.None);
+            var result = await GetRepo().Load(_org, CancellationToken.None);
             Assert.That(result, Is.Not.Null);
         });
     }
@@ -47,20 +71,17 @@ public class TestLoadingSettings
     [Test]
     public async Task Save_Then_Load_ReturnsPersistedValues()
     {
-        // Arrange
         var settings = new LoadingSettings
         {
-            Owner = _org,
-            Description = "Integration test settings",
+            Owner         = _org,
+            Description   = "Integration test settings",
             StartPosition = 42,
-            BatchSize = 250
+            BatchSize     = 250
         };
 
-        // Act
-        await _repo.Save(settings, CancellationToken.None);
-        var loaded = await _repo.Load(_org, CancellationToken.None);
+        await GetRepo().Save(settings, CancellationToken.None);
+        var loaded = await GetRepo().Load(_org, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(loaded, Is.Not.Null);
@@ -76,28 +97,19 @@ public class TestLoadingSettings
     [Test]
     public async Task Save_Twice_Load_ReturnsLastValues()
     {
-        // Arrange
         var first = new LoadingSettings
         {
-            Owner = _org,
-            Description = "First",
-            StartPosition = 1,
-            BatchSize = 100
+            Owner = _org, Description = "First", StartPosition = 1, BatchSize = 100
         };
         var second = new LoadingSettings
         {
-            Owner = _org,
-            Description = "Second",
-            StartPosition = 99,
-            BatchSize = 500
+            Owner = _org, Description = "Second", StartPosition = 99, BatchSize = 500
         };
 
-        // Act
-        await _repo.Save(first, CancellationToken.None);
-        await _repo.Save(second, CancellationToken.None);
-        var loaded = await _repo.Load(_org, CancellationToken.None);
+        await GetRepo().Save(first, CancellationToken.None);
+        await GetRepo().Save(second, CancellationToken.None);
+        var loaded = await GetRepo().Load(_org, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(loaded.Description, Is.EqualTo(second.Description));
@@ -114,14 +126,14 @@ public class TestLoadingSettings
     {
         var unknownOrg = new Organization
         {
-            Id = Guid.NewGuid(),
-            Name = "Unknown",
-            Inn = "0000000000",
+            Id      = Guid.NewGuid(),
+            Name    = "Unknown",
+            Inn     = "0000000000",
             Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
         };
 
         Assert.ThrowsAsync<InvalidDataException>(async () =>
-            await _repo.Load(unknownOrg, CancellationToken.None));
+            await GetRepo().Load(unknownOrg, CancellationToken.None));
     }
 
     /// <summary>
@@ -132,21 +144,18 @@ public class TestLoadingSettings
     {
         var unknownOrg = new Organization
         {
-            Id = Guid.NewGuid(),
-            Name = "Unknown",
-            Inn = "0000000000",
+            Id      = Guid.NewGuid(),
+            Name    = "Unknown",
+            Inn     = "0000000000",
             Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
         };
 
         var settings = new LoadingSettings
         {
-            Owner = unknownOrg,
-            Description = "test",
-            StartPosition = 0,
-            BatchSize = 100
+            Owner = unknownOrg, Description = "test", StartPosition = 0, BatchSize = 100
         };
 
         Assert.ThrowsAsync<InvalidDataException>(async () =>
-            await _repo.Save(settings, CancellationToken.None));
+            await GetRepo().Save(settings, CancellationToken.None));
     }
 }
