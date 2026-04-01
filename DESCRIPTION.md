@@ -126,6 +126,18 @@ services.RegisterBusinessTrackerData(connectionString);
 }
 ```
 
+**Документация API (Scalar):**
+
+При запуске API доступны:
+
+| URL                                     | Описание                              |
+|-----------------------------------------|---------------------------------------|
+| `http://localhost:8000/scalar/v1`       | Интерактивный UI для тестирования API |
+| `http://localhost:8000/openapi/v1.json` | OpenAPI-спецификация (JSON)           |
+
+Scalar подключён через `Microsoft.AspNetCore.OpenApi` + `Scalar.AspNetCore` (Swashbuckle несовместим с Microsoft.OpenApi
+3.x).
+
 **Контроллеры:**
 
 | Контроллер          | Метод | Маршрут             | Описание                                          |
@@ -358,13 +370,14 @@ dotnet run --project BusinessTracker.Api
 
 ## Стек технологий
 
-| Компонент              | Технология                    |
-|------------------------|-------------------------------|
-| Язык                   | C# / .NET 10                  |
-| ORM                    | Entity Framework Core 10      |
-| База данных (основная) | PostgreSQL 16 (порт 5433)     |
-| База данных (источник) | MSSQL (порт 1433, устаревший) |
-| Миграции               | DbUp                          |
-| Тестирование           | NUnit 4                       |
-| HTTP-клиент            | System.Net.Http.HttpClient    |
-| Контейнеризация        | Docker / docker-compose       |
+| Компонент              | Технология                            |
+|------------------------|---------------------------------------|
+| Язык                   | C# / .NET 10                          |
+| ORM                    | Entity Framework Core 10              |
+| База данных (основная) | PostgreSQL 16 (порт 5433)             |
+| База данных (источник) | MSSQL (порт 1433, устаревший)         |
+| Миграции               | DbUp                                  |
+| Тестирование           | NUnit 4                               |
+| HTTP-клиент            | System.Net.Http.HttpClient            |
+| Контейнеризация        | Docker / docker-compose               |
+| API-документация       | Microsoft.AspNetCore.OpenApi + Scalar |
