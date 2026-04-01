@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\BusinessTracker.Domain\BusinessTracker.Domain.csproj"/>
+        <ProjectReference Include="..\BusinessTracker.Common\BusinessTracker.Common.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
