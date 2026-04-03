@@ -1,22 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
-using BusinessTracker.Data.Models;
+﻿using BusinessTracker.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessTracker.Data;
 
 /// <summary>
-/// Контекст базы данных PostgreSQL для приложения BusinessTracker.
+///     Контекст базы данных PostgreSQL для приложения BusinessTracker.
 /// </summary>
 public partial class BusinessTrackerContext : DbContext
 {
     /// <summary>
-    /// Инициализирует контекст с параметрами по умолчанию (подключение из <see cref="OnConfiguring"/>).
+    ///     Инициализирует контекст с параметрами по умолчанию (подключение из <see cref="OnConfiguring" />).
     /// </summary>
     public BusinessTrackerContext()
     {
     }
 
     /// <summary>
-    /// Инициализирует контекст с явно переданными параметрами подключения.
+    ///     Инициализирует контекст с явно переданными параметрами подключения.
     /// </summary>
     /// <param name="options">Параметры DbContext.</param>
     public BusinessTrackerContext(DbContextOptions<BusinessTrackerContext> options)

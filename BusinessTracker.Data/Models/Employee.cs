@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// EF-сущность сотрудника.
+///     EF-сущность сотрудника.
 /// </summary>
 public class Employee
 {

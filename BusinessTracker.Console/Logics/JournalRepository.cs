@@ -1,34 +1,35 @@
 using System.Data;
 using System.Data.Common;
-using Microsoft.Data.SqlClient;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Domain.Logic;
 using BusinessTracker.Domain.Models;
 using BusinessTracker.Domain.Models.Dto;
+using Microsoft.Data.SqlClient;
 
 namespace BusinessTracker.Console.Logics;
 
 /// <summary>
-/// Репозиторий для чтения данных из legacy MSSQL журнала.
+///     Репозиторий для чтения данных из legacy MSSQL журнала.
 /// </summary>
 public class JournalRepository : IClientRepository<JournalRowDto>
 {
-    private const string Sql = @"
-        SELECT TOP {0}
-            j.journalid,
-            j.transtype,
-            t.TransTypeName,
-            j.checknum,
-            j.id,
-            j.loginid,
-            j.dater,
-            j.quantity,
-            j.price,
-            j.sumdiscount
-        FROM journal j
-        LEFT JOIN transtypes t ON j.transtype = t.transtypeid
-        WHERE j.journalid >= {1}
-        ORDER BY j.journalid";
+    private const string Sql = """
+                                      SELECT TOP {0}
+                                          j.transnumber   AS journalid,
+                                          j.transtype,
+                                          t.description   AS TransTypeName,
+                                          j.receiptn      AS checknum,
+                                          j.id,
+                                          j.loginid,
+                                          j.dater,
+                                          j.quantity,
+                                          j.price,
+                                          j.discountamount AS sumdiscount
+                                      FROM journal j
+                                      LEFT JOIN transtype t ON j.transtype = t.transtypeid
+                                      WHERE j.transnumber >= {1}
+                                      ORDER BY j.transnumber
+                               """;
 
     public async Task<IEnumerable<JournalRowDto>> GetRows(DbConnection connection, LoadingSettings options)
     {

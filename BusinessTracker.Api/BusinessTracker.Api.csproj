@@ -8,13 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BusinessTracker.Data\BusinessTracker.Data.csproj" />
-        <ProjectReference Include="..\BusinessTracker.Common\BusinessTracker.Common.csproj" />
+        <ProjectReference Include="..\BusinessTracker.Data\BusinessTracker.Data.csproj"/>
+        <ProjectReference Include="..\BusinessTracker.Common\BusinessTracker.Common.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
-      <PackageReference Include="Scalar.AspNetCore" Version="2.13.18" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5"/>
+        <PackageReference Include="Scalar.AspNetCore" Version="2.13.18"/>
     </ItemGroup>
 
 

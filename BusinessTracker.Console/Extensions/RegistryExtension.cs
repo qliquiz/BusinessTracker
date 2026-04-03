@@ -1,14 +1,14 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Console.Logics;
 using BusinessTracker.Console.Models;
 using BusinessTracker.Domain.Models.Dto;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BusinessTracker.Console.Extensions;
 
 /// <summary>
-/// DI-регистрация зависимостей консольного приложения.
+///     DI-регистрация зависимостей консольного приложения.
 /// </summary>
 public static class RegistryExtension
 {

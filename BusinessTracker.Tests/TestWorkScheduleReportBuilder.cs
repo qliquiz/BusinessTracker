@@ -5,14 +5,14 @@ using BusinessTracker.Domain.Models;
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Модульные тесты построителя отчёта "График работы".
+///     Модульные тесты построителя отчёта "График работы".
 /// </summary>
 public class TestWorkScheduleReportBuilder
 {
-    private Organization _org = null!;
     private Employee _employeeA = null!;
     private Employee _employeeB = null!;
     private Nomenclature _nomenclature = null!;
+    private Organization _org = null!;
 
     [SetUp]
     public void SetUp()
@@ -31,7 +31,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Пустой список — пустой отчёт.
+    ///     Пустой список — пустой отчёт.
     /// </summary>
     [Test]
     public void Build_EmptyTransactions_ReturnsEmpty()
@@ -40,7 +40,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Продажи не попадают в отчёт графика работы.
+    ///     Продажи не попадают в отчёт графика работы.
     /// </summary>
     [Test]
     public void Build_SaleTransactions_Excluded()
@@ -54,7 +54,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Одна открытая смена (нет StopShift) — строка с ShiftEnd == null.
+    ///     Одна открытая смена (нет StopShift) — строка с ShiftEnd == null.
     /// </summary>
     [Test]
     public void Build_StartShiftWithoutStop_ShiftEndIsNull()
@@ -77,7 +77,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Закрытая смена корректно связывает StartShift и StopShift.
+    ///     Закрытая смена корректно связывает StartShift и StopShift.
     /// </summary>
     [Test]
     public void Build_ClosedShift_ShiftEndMatchesStopShift()
@@ -101,7 +101,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Два сотрудника — каждый получает свою строку.
+    ///     Два сотрудника — каждый получает свою строку.
     /// </summary>
     [Test]
     public void Build_TwoEmployees_TwoRows()
@@ -126,7 +126,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// StopShift одного сотрудника не связывается со StartShift другого.
+    ///     StopShift одного сотрудника не связывается со StartShift другого.
     /// </summary>
     [Test]
     public void Build_StopShiftBelongsToCorrectEmployee()
@@ -150,7 +150,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Два StartShift подряд без StopShift — две открытые смены.
+    ///     Два StartShift подряд без StopShift — две открытые смены.
     /// </summary>
     [Test]
     public void Build_TwoStartsNoStop_TwoOpenShifts()
@@ -172,8 +172,8 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Один StartShift и два StopShift — первый StopShift закрывает смену,
-    /// второй (осиротевший) игнорируется.
+    ///     Один StartShift и два StopShift — первый StopShift закрывает смену,
+    ///     второй (осиротевший) игнорируется.
     /// </summary>
     [Test]
     public void Build_OneStartTwoStops_OneShiftClosedOrphanIgnored()
@@ -196,7 +196,7 @@ public class TestWorkScheduleReportBuilder
     }
 
     /// <summary>
-    /// Два StartShift и два StopShift — две закрытые смены.
+    ///     Два StartShift и два StopShift — две закрытые смены.
     /// </summary>
     [Test]
     public void Build_TwoStartsTwoStops_TwoClosedShifts()
@@ -226,8 +226,9 @@ public class TestWorkScheduleReportBuilder
     private Transaction MakeTransaction(
         TransactionType type,
         Employee employee,
-        DateTimeOffset date) =>
-        new()
+        DateTimeOffset date)
+    {
+        return new Transaction
         {
             Id = Guid.NewGuid(),
             Type = type,
@@ -239,4 +240,5 @@ public class TestWorkScheduleReportBuilder
             Employee = employee,
             Nomenclature = _nomenclature
         };
+    }
 }

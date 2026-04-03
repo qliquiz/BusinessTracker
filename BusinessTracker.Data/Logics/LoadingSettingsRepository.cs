@@ -5,16 +5,18 @@ using BusinessTracker.Domain.Models;
 namespace BusinessTracker.Data.Logics;
 
 /// <summary>
-/// Реализация <see cref="ILoadingSettingsRepository"/> через EF Core.
+///     Реализация <see cref="ILoadingSettingsRepository" /> через EF Core.
 /// </summary>
 public class LoadingSettingsRepository : ILoadingSettingsRepository
 {
     private readonly BusinessTrackerContext _context;
 
     public LoadingSettingsRepository(BusinessTrackerContext context)
-        => _context = context;
+    {
+        _context = context;
+    }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async Task Save(LoadingSettings loadingSettings, CancellationToken cancellationToken)
     {
         var companyId = loadingSettings.Owner.Id;
@@ -25,22 +27,20 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public Task<LoadingSettings> Load(Organization organization, CancellationToken cancellationToken)
     {
         var item = _context.Organizations.FirstOrDefault(x => x.Id == organization.Id)
                    ?? throw new InvalidDataException($"Organization {organization.Id} not found");
 
         if (string.IsNullOrEmpty(item.LoadOptions))
-        {
             return Task.FromResult(new LoadingSettings
             {
-                Owner       = organization,
+                Owner = organization,
                 Description = "Default settings",
                 StartPosition = 0,
-                BatchSize   = 1000
+                BatchSize = 1000
             });
-        }
 
         var result = JsonSerializer.Deserialize<LoadingSettings>(item.LoadOptions)
                      ?? throw new InvalidDataException(

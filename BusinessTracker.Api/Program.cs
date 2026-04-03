@@ -1,11 +1,11 @@
 using System.Reflection;
-using Scalar.AspNetCore;
 using BusinessTracker.Api.Logics;
 using BusinessTracker.Api.Models;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Data;
 using BusinessTracker.Data.Extensions;
 using DbUp;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;

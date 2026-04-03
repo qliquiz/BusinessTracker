@@ -6,7 +6,7 @@ using BusinessTracker.Domain.Models.Dto;
 namespace BusinessTracker.Api.Logics;
 
 /// <summary>
-/// Сервис обработки транзакций, поступающих от клиентского приложения.
+///     Сервис обработки транзакций, поступающих от клиентского приложения.
 /// </summary>
 public class LoadingService(
     ILoadingSettingsRepository settingsRepository,
@@ -48,5 +48,7 @@ public class LoadingService(
 
     public async Task<bool> PushAsync(Organization organization, IEnumerable<JournalRowDto> transactions,
         CancellationToken token)
-        => await Task.Run(() => Push(organization, transactions, token), token);
+    {
+        return await Task.Run(() => Push(organization, transactions, token), token);
+    }
 }

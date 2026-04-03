@@ -1,22 +1,22 @@
+using System.Diagnostics;
 using System.Net.Http.Json;
-using System.IO;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Console.Extensions;
 using BusinessTracker.Console.Models;
 using BusinessTracker.Domain;
 using BusinessTracker.Domain.Models;
 using BusinessTracker.Domain.Models.Dto;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 CurrentApplication.ShowLogo();
 
 // Конфигурация
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false)
+    .AddJsonFile("appsettings.json", false)
     .Build();
 
 // DI
@@ -35,46 +35,57 @@ var defaultSettings = new LoadingSettings
 {
     Owner = new Organization
     {
-        Id      = organizationId,
-        Name    = "Главный офис (Спб)",
-        Inn     = "1234567890",
+        Id = organizationId,
+        Name = "Главный офис (Спб)",
+        Inn = "1234567890",
         Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
     },
-    Description   = "Default",
+    Description = "Default",
     StartPosition = 0,
-    BatchSize     = 1000
+    BatchSize = 1000
 };
 
 while (true)
 {
+    var totalTransferred = 0;
+    var stopwatch = Stopwatch.StartNew();
+
     try
     {
-        // Загрузка данных из MSSQL
-        await using var connection = new SqlConnection(options.MsSqlConnectionString);
-        var rows = (await journalRepo.GetRows(connection, defaultSettings)).ToList();
-
-        if (rows.Count > 0)
+        while (true)
         {
+            // Загрузка данных из MSSQL
+            await using var connection = new SqlConnection(options.MsSqlConnectionString);
+            var rows = (await journalRepo.GetRows(connection, defaultSettings)).ToList();
+
+            if (rows.Count == 0)
+                break;
+
             // Отправка в API
             var client = httpFactory.CreateClient("api");
             var request = new
             {
                 OrganizationId = organizationId,
-                Transactions   = rows
+                Transactions = rows
             };
 
             var response = await client.PostAsJsonAsync("/api/journal/push", request);
             response.EnsureSuccessStatusCode();
 
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Отправлено {rows.Count} транзакций.");
-
-            // Смещаем позицию для следующего батча
+            totalTransferred += rows.Count;
             defaultSettings.StartPosition = rows.Max(r => r.Code) + 1;
+
+            Console.WriteLine(
+                $"[{DateTime.Now:HH:mm:ss}] Батч: {rows.Count} транзакций. Всего: {totalTransferred}. Позиция: {defaultSettings.StartPosition}");
         }
+
+        stopwatch.Stop();
+
+        if (totalTransferred > 0)
+            Console.WriteLine(
+                $"[{DateTime.Now:HH:mm:ss}] Итого: {totalTransferred} записей перенесено за {stopwatch.Elapsed.TotalSeconds:F1} сек.");
         else
-        {
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Новых транзакций нет.");
-        }
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Новых транзакций нет. Ожидание 1 час...");
     }
     catch (Exception ex)
     {

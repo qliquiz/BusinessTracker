@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// Плоская строка журнала транзакций, сохранённая из legacy MSSQL.
+///     Плоская строка журнала транзакций, сохранённая из legacy MSSQL.
 /// </summary>
 public class JournalRow
 {

@@ -1,13 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
 using BusinessTracker.Api.Models;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Data;
 using BusinessTracker.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BusinessTracker.Api.Controllers;
 
 /// <summary>
-/// Контроллер приёма транзакций от клиентских приложений.
+///     Контроллер приёма транзакций от клиентских приложений.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -15,7 +15,7 @@ public class JournalController(ILoadingService loadingService, BusinessTrackerCo
     : ControllerBase
 {
     /// <summary>
-    /// Принять и сохранить список транзакций от клиентского приложения.
+    ///     Принять и сохранить список транзакций от клиентского приложения.
     /// </summary>
     /// <param name="request">Идентификатор организации и список транзакций.</param>
     /// <param name="token">Токен отмены.</param>

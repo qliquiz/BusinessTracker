@@ -1,13 +1,13 @@
+using BusinessTracker.Data.Logics;
+using BusinessTracker.Domain.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using BusinessTracker.Domain.Core.Abstractions;
-using BusinessTracker.Data.Logics;
 
 namespace BusinessTracker.Data.Extensions;
 
 /// <summary>
-/// DI-регистрация зависимостей слоя данных.
+///     DI-регистрация зависимостей слоя данных.
 /// </summary>
 public static class RegistryExtension
 {
@@ -15,7 +15,7 @@ public static class RegistryExtension
         "User ID=admin;Password=123456;Host=localhost;Port=5433;Database=business_tracker;";
 
     /// <summary>
-    /// Регистрация с чтением строки подключения из <see cref="IConfiguration"/>.
+    ///     Регистрация с чтением строки подключения из <see cref="IConfiguration" />.
     /// </summary>
     public static IServiceCollection RegisterBusinessTrackerData(
         this IServiceCollection services,
@@ -27,7 +27,7 @@ public static class RegistryExtension
     }
 
     /// <summary>
-    /// Регистрация с явной передачей строки подключения (проброс из модели настроек).
+    ///     Регистрация с явной передачей строки подключения (проброс из модели настроек).
     /// </summary>
     public static IServiceCollection RegisterBusinessTrackerData(
         this IServiceCollection services,

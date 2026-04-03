@@ -4,101 +4,104 @@ using BusinessTracker.Domain.Core.Attributes;
 namespace BusinessTracker.Domain.Models.Dto;
 
 /// <summary>
-/// Запись в журнале клиентской программы (legacy MSSQL).
+///     Запись в журнале клиентской программы (legacy MSSQL).
 /// </summary>
 public class JournalRowDto : IDto
 {
     /// <summary>
-    /// Уникальный код транзакции.
+    ///     Уникальный код транзакции.
     /// </summary>
     [ColumnMapping("journalid")]
     public long Code { get; set; }
 
     /// <summary>
-    /// Уникальный код типа транзакции.
+    ///     Уникальный код типа транзакции.
     /// </summary>
     [ColumnMapping("transtype")]
     public int TypeCode { get; set; }
 
     /// <summary>
-    /// Наименование типа транзакции.
+    ///     Наименование типа транзакции.
     /// </summary>
     [ColumnMapping("TransTypeName")]
     public string TransTypeName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Номер чека.
+    ///     Номер чека.
     /// </summary>
     [ColumnMapping("checknum")]
     public int ReceiptNumber { get; set; }
 
     /// <summary>
-    /// Уникальный код продукта.
+    ///     Уникальный код продукта.
     /// </summary>
     public long? ProductCode { get; set; }
 
     /// <summary>
-    /// Уникальный код категории продуктов.
+    ///     Уникальный код категории продуктов.
     /// </summary>
     public long? CategoryCode { get; set; }
 
     /// <summary>
-    /// Код сотрудника.
+    ///     Код сотрудника.
     /// </summary>
     public int? EmployeeCode { get; set; }
 
     /// <summary>
-    /// Дата и время транзакции.
+    ///     Дата и время транзакции.
     /// </summary>
     [ColumnMapping("dater")]
     public DateTime Period { get; set; }
 
     /// <summary>
-    /// Количество.
+    ///     Количество.
     /// </summary>
     [ColumnMapping("quantity")]
     public double Quantity { get; set; }
 
     /// <summary>
-    /// Цена.
+    ///     Цена.
     /// </summary>
     [ColumnMapping("price")]
     public double Price { get; set; }
 
     /// <summary>
-    /// Сумма скидки.
+    ///     Сумма скидки.
     /// </summary>
     [ColumnMapping("sumdiscount")]
     public double Discount { get; set; }
 
     /// <summary>
-    /// Сырое поле <c>id</c> из таблицы журнала; используется для определения кода продукта или сотрудника.
+    ///     Сырое поле <c>id</c> из таблицы журнала; используется для определения кода продукта или сотрудника.
     /// </summary>
     [ColumnMapping("id")]
     public int RawId { get; set; }
 
     /// <summary>
-    /// Сырое поле <c>loginid</c> из таблицы журнала; используется как код сотрудника, если не равно 0.
+    ///     Сырое поле <c>loginid</c> из таблицы журнала; используется как код сотрудника, если не равно 0.
     /// </summary>
     [ColumnMapping("loginid")]
     public int RawLoginId { get; set; }
 
     /// <summary>
-    /// Имя сотрудника.
+    ///     Имя сотрудника.
     /// </summary>
     public string EmployeeName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Наименование категории.
+    ///     Наименование категории.
     /// </summary>
     public string CategoryName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Наименование номенклатуры.
+    ///     Наименование номенклатуры.
     /// </summary>
     public string NomenclatureName { get; set; } = string.Empty;
 
-    /// <inheritdoc/>
-    public override string ToString() =>
-        $"{Period}: Транзакция — {Quantity * Price}, Тип: {TransTypeName}, Продукт: {ProductCode}, Сотрудник: {EmployeeCode}";
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return
+            $"{Period}: Транзакция — {Quantity * Price}, Тип: {TransTypeName}, Продукт: {ProductCode}, Сотрудник: {EmployeeCode}";
+    }
 }
