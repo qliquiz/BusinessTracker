@@ -42,7 +42,7 @@ var defaultSettings = new LoadingSettings
     },
     Description = "Default",
     StartPosition = 0,
-    BatchSize = 1000
+    BatchSize = 5000
 };
 
 while (true)
