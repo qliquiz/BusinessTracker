@@ -6,7 +6,7 @@ using BusinessTracker.Domain.Models.Dto;
 namespace BusinessTracker.Domain.Logic;
 
 /// <summary>
-/// Утилита для маппинга данных из ADO.NET в DTO.
+///     Утилита для маппинга данных из ADO.NET в DTO.
 /// </summary>
 public static class DataMapper
 {
@@ -17,7 +17,7 @@ public static class DataMapper
     private const string TransTypeStopShift = "Окончание работы";
 
     /// <summary>
-    /// Маппинг одной строки данных в объект DTO.
+    ///     Маппинг одной строки данных в объект DTO.
     /// </summary>
     private static T Map<T>(DataRow row) where T : new()
     {
@@ -33,10 +33,7 @@ public static class DataMapper
                 var value = row[attr.ColumnName];
                 if (value != DBNull.Value)
                 {
-                    if (value is string s && string.IsNullOrEmpty(s))
-                    {
-                        continue;
-                    }
+                    if (value is string s && string.IsNullOrEmpty(s)) continue;
 
                     var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
                     var convertedValue = Convert.ChangeType(value, targetType);
@@ -49,7 +46,7 @@ public static class DataMapper
     }
 
     /// <summary>
-    /// Загрузка и маппинг транзакций из DataTable.
+    ///     Загрузка и маппинг транзакций из DataTable.
     /// </summary>
     public static List<JournalRowDto> LoadJournalTransactions(DataTable journalTable)
     {
@@ -59,10 +56,7 @@ public static class DataMapper
         {
             var dto = Map<JournalRowDto>(row);
 
-            if (dto.RawLoginId != 0)
-            {
-                dto.EmployeeCode = dto.RawLoginId;
-            }
+            if (dto.RawLoginId != 0) dto.EmployeeCode = dto.RawLoginId;
 
             switch (dto.TransTypeName)
             {

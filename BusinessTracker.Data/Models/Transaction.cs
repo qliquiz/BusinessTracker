@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// EF-сущность транзакции.
+///     EF-сущность транзакции.
 /// </summary>
 public class Transaction
 {

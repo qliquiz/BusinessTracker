@@ -1,17 +1,17 @@
 namespace BusinessTracker.Domain.Core.Enums;
 
 /// <summary>
-/// Перечисление типов сотрудников.
+///     Перечисление типов сотрудников.
 /// </summary>
 public enum EmployeeRole
 {
     /// <summary>
-    /// Менеджер.
+    ///     Менеджер.
     /// </summary>
     Manager,
 
     /// <summary>
-    /// Администратор.
+    ///     Администратор.
     /// </summary>
     Administrator
 }

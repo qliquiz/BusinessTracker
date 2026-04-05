@@ -5,31 +5,31 @@ using BusinessTracker.Domain.Core.Enums;
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
-/// Модель сотрудника.
+///     Модель сотрудника.
 /// </summary>
 public class Employee : DomainModel
 {
     /// <summary>
-    /// Наименование.
+    ///     Наименование.
     /// </summary>
     [Required]
     [StringLength(255)]
     public required string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Контактный телефон.
+    ///     Контактный телефон.
     /// </summary>
     [Template(@"^\+[0-9]{9,15}$")]
     public string? PhoneNumber { get; set; }
 
     /// <summary>
-    /// Организация-владелец сотрудника.
+    ///     Организация-владелец сотрудника.
     /// </summary>
     [Required]
     public Organization Owner { get; set; } = null!;
 
     /// <summary>
-    /// Роль сотрудника.
+    ///     Роль сотрудника.
     /// </summary>
     public EmployeeRole Role { get; set; } = EmployeeRole.Manager;
 }

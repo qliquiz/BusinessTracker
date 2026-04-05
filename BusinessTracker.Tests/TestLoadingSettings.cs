@@ -1,24 +1,44 @@
-using BusinessTracker.Data.Logics;
+using BusinessTracker.Data.Extensions;
+using BusinessTracker.Domain.Core.Abstractions;
 using BusinessTracker.Domain.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Интеграционные тесты для <see cref="LoadingSettingsRepository"/>.
-/// Требуют запущенной БД (docker-compose up).
+///     Интеграционные тесты для <see cref="ILoadingSettingsRepository" />.
+///     Требуют запущенной БД (docker-compose up).
 /// </summary>
 public class TestLoadingSettings
 {
-    // Фиксированный Id из seed_init.sql — Главный офис (Спб)
     private static readonly Guid SeedOrgId = new("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-
-    private LoadingSettingsRepository _repo = null!;
     private Organization _org = null!;
+
+    private ServiceProvider _provider = null!;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        _provider = new ServiceCollection()
+            .RegisterBusinessTrackerData(configuration)
+            .BuildServiceProvider();
+    }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        _provider.Dispose();
+    }
 
     [SetUp]
     public void SetUp()
     {
-        _repo = new LoadingSettingsRepository();
         _org = new Organization
         {
             Id = SeedOrgId,
@@ -28,26 +48,31 @@ public class TestLoadingSettings
         };
     }
 
+    private ILoadingSettingsRepository GetRepo()
+    {
+        var scope = _provider.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<ILoadingSettingsRepository>();
+    }
+
     /// <summary>
-    /// Load не бросает исключение и возвращает объект (дефолтный или сохранённый).
+    ///     Load не бросает исключение и возвращает объект (дефолтный или сохранённый).
     /// </summary>
     [Test]
     public void Load_LoadingSettingsRepository_NotThrowsException()
     {
         Assert.DoesNotThrowAsync(async () =>
         {
-            var result = await _repo.Load(_org, CancellationToken.None);
+            var result = await GetRepo().Load(_org, CancellationToken.None);
             Assert.That(result, Is.Not.Null);
         });
     }
 
     /// <summary>
-    /// Save сохраняет настройки, Load возвращает те же значения.
+    ///     Save сохраняет настройки, Load возвращает те же значения.
     /// </summary>
     [Test]
     public async Task Save_Then_Load_ReturnsPersistedValues()
     {
-        // Arrange
         var settings = new LoadingSettings
         {
             Owner = _org,
@@ -56,11 +81,9 @@ public class TestLoadingSettings
             BatchSize = 250
         };
 
-        // Act
-        await _repo.Save(settings, CancellationToken.None);
-        var loaded = await _repo.Load(_org, CancellationToken.None);
+        await GetRepo().Save(settings, CancellationToken.None);
+        var loaded = await GetRepo().Load(_org, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(loaded, Is.Not.Null);
@@ -71,33 +94,24 @@ public class TestLoadingSettings
     }
 
     /// <summary>
-    /// Повторный Save перезаписывает настройки — Load возвращает последние значения.
+    ///     Повторный Save перезаписывает настройки — Load возвращает последние значения.
     /// </summary>
     [Test]
     public async Task Save_Twice_Load_ReturnsLastValues()
     {
-        // Arrange
         var first = new LoadingSettings
         {
-            Owner = _org,
-            Description = "First",
-            StartPosition = 1,
-            BatchSize = 100
+            Owner = _org, Description = "First", StartPosition = 1, BatchSize = 100
         };
         var second = new LoadingSettings
         {
-            Owner = _org,
-            Description = "Second",
-            StartPosition = 99,
-            BatchSize = 500
+            Owner = _org, Description = "Second", StartPosition = 99, BatchSize = 500
         };
 
-        // Act
-        await _repo.Save(first, CancellationToken.None);
-        await _repo.Save(second, CancellationToken.None);
-        var loaded = await _repo.Load(_org, CancellationToken.None);
+        await GetRepo().Save(first, CancellationToken.None);
+        await GetRepo().Save(second, CancellationToken.None);
+        var loaded = await GetRepo().Load(_org, CancellationToken.None);
 
-        // Assert
         Assert.Multiple(() =>
         {
             Assert.That(loaded.Description, Is.EqualTo(second.Description));
@@ -107,7 +121,7 @@ public class TestLoadingSettings
     }
 
     /// <summary>
-    /// Load для несуществующей организации бросает <see cref="InvalidDataException"/>.
+    ///     Load для несуществующей организации бросает <see cref="InvalidDataException" />.
     /// </summary>
     [Test]
     public void Load_UnknownOrganization_ThrowsInvalidDataException()
@@ -121,11 +135,11 @@ public class TestLoadingSettings
         };
 
         Assert.ThrowsAsync<InvalidDataException>(async () =>
-            await _repo.Load(unknownOrg, CancellationToken.None));
+            await GetRepo().Load(unknownOrg, CancellationToken.None));
     }
 
     /// <summary>
-    /// Save для несуществующей организации бросает <see cref="InvalidDataException"/>.
+    ///     Save для несуществующей организации бросает <see cref="InvalidDataException" />.
     /// </summary>
     [Test]
     public void Save_UnknownOrganization_ThrowsInvalidDataException()
@@ -140,13 +154,10 @@ public class TestLoadingSettings
 
         var settings = new LoadingSettings
         {
-            Owner = unknownOrg,
-            Description = "test",
-            StartPosition = 0,
-            BatchSize = 100
+            Owner = unknownOrg, Description = "test", StartPosition = 0, BatchSize = 100
         };
 
         Assert.ThrowsAsync<InvalidDataException>(async () =>
-            await _repo.Save(settings, CancellationToken.None));
+            await GetRepo().Save(settings, CancellationToken.None));
     }
 }
