@@ -21,7 +21,7 @@ public static class RegistryExtension
         services.AddScoped<IClientRepository<JournalRowDto>, JournalRepository>();
 
         var apiBaseUrl = configuration
-            .GetSection(nameof(ConsoleOptions))
+            .GetSection(nameof(ConsoleOptions.ApiBaseUrl))
             .GetValue<string>("ApiBaseUrl") ?? "http://localhost:8000";
 
         services.AddHttpClient("api", client =>

@@ -8,10 +8,7 @@ CREATE TABLE IF NOT EXISTS "JournalRows"
     gen_random_uuid
 (
 ) PRIMARY KEY,
-    "OrganizationId" UUID NOT NULL REFERENCES "Organizations"
-(
-    "Id"
-),
+    "OrganizationId" UUID NOT NULL,
     "Code" BIGINT NOT NULL,
     "TypeCode" INT NOT NULL,
     "TransTypeName" TEXT NOT NULL DEFAULT '',

@@ -40,8 +40,8 @@ public class LoadingService(
         var lastCode = innerTransactions.Max(x => x.Code);
         settings.StartPosition = lastCode + 1;
 
-        Task.Run(() => settingsRepository.Save(settings, token), token).Wait(token);
-        Task.Run(() => journalRowsRepository.SaveAsync(organization.Id, innerTransactions, token), token).Wait(token);
+        settingsRepository.Save(settings, token).Wait(token);
+        journalRowsRepository.SaveAsync(organization.Id, innerTransactions, token).Wait(token);
 
         return true;
     }

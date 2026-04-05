@@ -11,9 +11,6 @@ namespace BusinessTracker.Data.Extensions;
 /// </summary>
 public static class RegistryExtension
 {
-    private const string DefaultConnectionString =
-        "User ID=admin;Password=123456;Host=localhost;Port=5433;Database=business_tracker;";
-
     /// <summary>
     ///     Регистрация с чтением строки подключения из <see cref="IConfiguration" />.
     /// </summary>
@@ -22,7 +19,8 @@ public static class RegistryExtension
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-                               ?? DefaultConnectionString;
+                               ?? throw new InvalidOperationException(
+                                   "Connection string 'DefaultConnection' is not configured.");
         return services.RegisterBusinessTrackerData(connectionString);
     }
 
