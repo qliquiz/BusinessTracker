@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// EF-сущность организации.
+///     EF-сущность организации.
 /// </summary>
 public class Organization
 {

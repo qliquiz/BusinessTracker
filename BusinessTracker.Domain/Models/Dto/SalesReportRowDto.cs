@@ -3,47 +3,47 @@ using BusinessTracker.Domain.Core.Abstractions;
 namespace BusinessTracker.Domain.Models.Dto;
 
 /// <summary>
-/// Строка отчёта "Продажи".
+///     Строка отчёта "Продажи".
 /// </summary>
 public class SalesReportRowDto : IDto
 {
     /// <summary>
-    /// Код группы (категории).
+    ///     Код группы (категории).
     /// </summary>
     public Guid CategoryId { get; init; }
 
     /// <summary>
-    /// Название группы (категории).
+    ///     Название группы (категории).
     /// </summary>
     public string CategoryName { get; init; } = string.Empty;
 
     /// <summary>
-    /// Код номенклатуры.
+    ///     Код номенклатуры.
     /// </summary>
     public Guid NomenclatureId { get; init; }
 
     /// <summary>
-    /// Название номенклатуры.
+    ///     Название номенклатуры.
     /// </summary>
     public string NomenclatureName { get; init; } = string.Empty;
 
     /// <summary>
-    /// Количество.
+    ///     Количество.
     /// </summary>
     public decimal Quantity { get; init; }
 
     /// <summary>
-    /// Сумма.
+    ///     Сумма.
     /// </summary>
     public decimal Amount { get; init; }
 
     /// <summary>
-    /// Сумма скидки.
+    ///     Сумма скидки.
     /// </summary>
     public decimal DiscountAmount { get; init; }
 
     /// <summary>
-    /// Код организации.
+    ///     Код организации.
     /// </summary>
     public Guid OrganizationId { get; init; }
 }

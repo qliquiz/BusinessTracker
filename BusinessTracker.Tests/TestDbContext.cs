@@ -3,12 +3,11 @@ using BusinessTracker.Data.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.IO;
 
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Набор тестов для проверки работы контекста базы данных.
+///     Набор тестов для проверки работы контекста базы данных.
 /// </summary>
 public class TestDbContext
 {
@@ -28,10 +27,13 @@ public class TestDbContext
     }
 
     [OneTimeTearDown]
-    public void TearDown() => _provider.Dispose();
+    public void TearDown()
+    {
+        _provider.Dispose();
+    }
 
     /// <summary>
-    /// Проверить выборку данных. Получить список всех организаций.
+    ///     Проверить выборку данных. Получить список всех организаций.
     /// </summary>
     [Test]
     public async Task FetchCompanies_Any()

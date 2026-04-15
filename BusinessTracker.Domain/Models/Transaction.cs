@@ -4,59 +4,58 @@ using BusinessTracker.Domain.Core.Enums;
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
-/// Модель транзакции.
+///     Модель транзакции.
 /// </summary>
 public class Transaction : DomainModel
 {
     /// <summary>
-    /// Тип транзакции.
+    ///     Тип транзакции.
     /// </summary>
     [Required]
     public required TransactionType Type { get; set; }
 
     /// <summary>
-    /// Сумма.
+    ///     Сумма.
     /// </summary>
     [Required]
     [Range(0.01, double.MaxValue)]
     public required decimal Amount { get; set; }
 
     /// <summary>
-    /// Сумма скидки.
+    ///     Сумма скидки.
     /// </summary>
     [Required]
     [Range(0, double.MaxValue)]
     public required decimal Discount { get; set; }
 
     /// <summary>
-    /// Количество.
+    ///     Количество.
     /// </summary>
     [Required]
     [Range(0.01, double.MaxValue)]
     public required decimal Quantity { get; set; }
 
     /// <summary>
-    /// Дата и время.
+    ///     Дата и время.
     /// </summary>
     [Required]
     public required DateTimeOffset TransactionDate { get; set; }
 
     /// <summary>
-    /// Организация владелец.
+    ///     Организация владелец.
     /// </summary>
     [Required]
     public required Organization Owner { get; set; } = null!;
 
     /// <summary>
-    /// Номенклатура.
+    ///     Номенклатура.
     /// </summary>
     [Required]
     public required Nomenclature Nomenclature { get; set; } = null!;
 
     /// <summary>
-    /// Сотрудник, который выполнил операцию.
+    ///     Сотрудник, который выполнил операцию.
     /// </summary>
     [Required]
     public required Employee Employee { get; set; } = null!;
-
 }

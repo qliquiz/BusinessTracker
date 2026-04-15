@@ -5,15 +5,15 @@ using BusinessTracker.Domain.Models;
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Модульные тесты построителя отчёта "Продажи".
+///     Модульные тесты построителя отчёта "Продажи".
 /// </summary>
 public class TestSalesReportBuilder
 {
-    private Organization _org = null!;
-    private Employee _employee = null!;
-    private Category _category = null!;
     private Nomenclature _bread = null!;
+    private Category _category = null!;
+    private Employee _employee = null!;
     private Nomenclature _milk = null!;
+    private Organization _org = null!;
 
     [SetUp]
     public void SetUp()
@@ -32,7 +32,7 @@ public class TestSalesReportBuilder
     }
 
     /// <summary>
-    /// Пустой список — пустой отчёт.
+    ///     Пустой список — пустой отчёт.
     /// </summary>
     [Test]
     public void Build_EmptyTransactions_ReturnsEmpty()
@@ -41,7 +41,7 @@ public class TestSalesReportBuilder
     }
 
     /// <summary>
-    /// Смены не попадают в отчёт продаж.
+    ///     Смены не попадают в отчёт продаж.
     /// </summary>
     [Test]
     public void Build_ShiftTransactions_Excluded()
@@ -56,15 +56,15 @@ public class TestSalesReportBuilder
     }
 
     /// <summary>
-    /// Две продажи одной номенклатуры группируются в одну строку.
+    ///     Две продажи одной номенклатуры группируются в одну строку.
     /// </summary>
     [Test]
     public void Build_TwoSalesSameNomenclature_OneRow()
     {
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, _bread, amount: 50m, quantity: 1m, discount: 5m),
-            MakeTransaction(TransactionType.Sale, _bread, amount: 50m, quantity: 2m, discount: 5m)
+            MakeTransaction(TransactionType.Sale, _bread, 50m, 1m, 5m),
+            MakeTransaction(TransactionType.Sale, _bread, 50m, 2m, 5m)
         };
 
         var report = SalesReportBuilder.Build(transactions).ToList();
@@ -84,7 +84,7 @@ public class TestSalesReportBuilder
     }
 
     /// <summary>
-    /// Разные номенклатуры дают разные строки.
+    ///     Разные номенклатуры дают разные строки.
     /// </summary>
     [Test]
     public void Build_DifferentNomenclatures_MultipleRows()
@@ -99,15 +99,15 @@ public class TestSalesReportBuilder
     }
 
     /// <summary>
-    /// Возвраты включаются в отчёт наравне с продажами (суммирование валовое).
+    ///     Возвраты включаются в отчёт наравне с продажами (суммирование валовое).
     /// </summary>
     [Test]
     public void Build_ReturnIncludedInReport()
     {
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, _bread, amount: 100m, quantity: 5m),
-            MakeTransaction(TransactionType.Return, _bread, amount: 20m, quantity: 1m)
+            MakeTransaction(TransactionType.Sale, _bread, 100m, 5m),
+            MakeTransaction(TransactionType.Return, _bread, 20m, 1m)
         };
 
         var report = SalesReportBuilder.Build(transactions).ToList();
@@ -125,8 +125,9 @@ public class TestSalesReportBuilder
         Nomenclature nomenclature,
         decimal amount = 1m,
         decimal quantity = 1m,
-        decimal discount = 0m) =>
-        new()
+        decimal discount = 0m)
+    {
+        return new Transaction
         {
             Id = Guid.NewGuid(),
             Type = type,
@@ -138,4 +139,5 @@ public class TestSalesReportBuilder
             Employee = _employee,
             Nomenclature = nomenclature
         };
+    }
 }

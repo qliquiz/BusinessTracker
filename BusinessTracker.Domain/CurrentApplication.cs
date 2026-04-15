@@ -1,7 +1,7 @@
 ﻿namespace BusinessTracker.Domain;
 
 /// <summary>
-/// Отдельный класс для реализации общих методов в рамках приложения.
+///     Отдельный класс для реализации общих методов в рамках приложения.
 /// </summary>
 public static class CurrentApplication
 {
@@ -18,22 +18,19 @@ public static class CurrentApplication
     ];
 
     /// <summary>
-    /// Отобразить логотип приложения.
+    ///     Отобразить логотип приложения.
     /// </summary>
     public static void ShowLogo()
     {
         Console.ForegroundColor = ConsoleColor.Cyan;
-        foreach (var line in AsciiArt)
-        {
-            Console.WriteLine(line);
-        }
+        foreach (var line in AsciiArt) Console.WriteLine(line);
 
         Console.ResetColor();
         Console.WriteLine($"The Personal Account Software (c) by @GorevArtem\nVersion: {CurrentVersion()}");
     }
 
     /// <summary>
-    /// Получить текущую версию сборки приложения.
+    ///     Получить текущую версию сборки приложения.
     /// </summary>
     /// <returns>string</returns>
     public static string CurrentVersion()

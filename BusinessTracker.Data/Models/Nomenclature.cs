@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// EF-сущность номенклатуры (товара/услуги).
+///     EF-сущность номенклатуры (товара/услуги).
 /// </summary>
 public class Nomenclature
 {

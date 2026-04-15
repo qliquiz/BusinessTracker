@@ -4,17 +4,12 @@ using System.Text.RegularExpressions;
 namespace BusinessTracker.Domain.Core.Attributes;
 
 /// <summary>
-/// Атрибут для проверки корректности строковых данных на основе регулярного выражения.
+///     Атрибут для проверки корректности строковых данных на основе регулярного выражения.
 /// </summary>
 public class TemplateAttribute : ValidationAttribute
 {
     /// <summary>
-    ///  Шаблон для проверки.
-    /// </summary>
-    public string Template { get; set; }
-
-    /// <summary>
-    /// Конструктор класса <see cref="TemplateAttribute"/>.
+    ///     Конструктор класса <see cref="TemplateAttribute" />.
     /// </summary>
     /// <param name="template">Шаблон регулярного выражения.</param>
     /// <exception cref="ArgumentNullException"></exception>
@@ -23,7 +18,12 @@ public class TemplateAttribute : ValidationAttribute
         Template = template ?? throw new ArgumentNullException(nameof(template));
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    ///     Шаблон для проверки.
+    /// </summary>
+    public string Template { get; set; }
+
+    /// <inheritdoc />
     public override bool IsValid(object? value)
     {
         return value switch
@@ -34,7 +34,7 @@ public class TemplateAttribute : ValidationAttribute
         };
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override string FormatErrorMessage(string name)
     {
         return $"Поле {name} должно соответствовать формату: {Template}";

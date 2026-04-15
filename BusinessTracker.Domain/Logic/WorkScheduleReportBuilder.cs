@@ -5,18 +5,18 @@ using BusinessTracker.Domain.Models.Dto;
 namespace BusinessTracker.Domain.Logic;
 
 /// <summary>
-/// Построитель отчёта "График работы" на основе доменных моделей транзакций.
-/// <para>
-/// Алгоритм: события сортируются по времени, затем по каждому сотруднику
-/// StartShift ставится в очередь. Каждый StopShift закрывает первый открытый StartShift.
-/// Незакрытые смены добавляются в конец с <see cref="WorkScheduleReportRowDto.ShiftEnd"/> = null.
-/// Осиротевшие StopShift (без предшествующего StartShift) игнорируются.
-/// </para>
+///     Построитель отчёта "График работы" на основе доменных моделей транзакций.
+///     <para>
+///         Алгоритм: события сортируются по времени, затем по каждому сотруднику
+///         StartShift ставится в очередь. Каждый StopShift закрывает первый открытый StartShift.
+///         Незакрытые смены добавляются в конец с <see cref="WorkScheduleReportRowDto.ShiftEnd" /> = null.
+///         Осиротевшие StopShift (без предшествующего StartShift) игнорируются.
+///     </para>
 /// </summary>
 public static class WorkScheduleReportBuilder
 {
     /// <summary>
-    /// Сформировать отчёт по сменам сотрудников.
+    ///     Сформировать отчёт по сменам сотрудников.
     /// </summary>
     public static IEnumerable<WorkScheduleReportRowDto> Build(IEnumerable<Transaction> transactions)
     {
@@ -36,7 +36,6 @@ public static class WorkScheduleReportBuilder
             var openShifts = new Queue<DateTimeOffset>();
 
             foreach (var ev in events)
-            {
                 if (ev.Type == TransactionType.StartShift)
                 {
                     openShifts.Enqueue(ev.TransactionDate);
@@ -55,11 +54,9 @@ public static class WorkScheduleReportBuilder
                         OrganizationId = org.Id
                     });
                 }
-            }
 
             // Незакрытые смены
             foreach (var shiftStart in openShifts)
-            {
                 result.Add(new WorkScheduleReportRowDto
                 {
                     EmployeeId = employee.Id,
@@ -68,16 +65,15 @@ public static class WorkScheduleReportBuilder
                     ShiftEnd = null,
                     OrganizationId = org.Id
                 });
-            }
         }
 
         return result;
     }
 
     /// <summary>
-    /// Оптимизированная версия: один проход для сбора событий, одна глобальная сортировка,
-    /// <see cref="Dictionary{TKey,TValue}"/> вместо LINQ <c>GroupBy</c>.
-    /// Исключает N сортировок (по одной на каждого сотрудника) и промежуточные <c>IGrouping</c>.
+    ///     Оптимизированная версия: один проход для сбора событий, одна глобальная сортировка,
+    ///     <see cref="Dictionary{TKey,TValue}" /> вместо LINQ <c>GroupBy</c>.
+    ///     Исключает N сортировок (по одной на каждого сотрудника) и промежуточные <c>IGrouping</c>.
     /// </summary>
     public static IEnumerable<WorkScheduleReportRowDto> BuildOptimized(IEnumerable<Transaction> transactions)
     {
@@ -86,10 +82,8 @@ public static class WorkScheduleReportBuilder
         // Сбор событий смен одним проходом
         var shiftEvents = new List<Transaction>();
         foreach (var t in transactions)
-        {
             if (t.Type is TransactionType.StartShift or TransactionType.StopShift)
                 shiftEvents.Add(t);
-        }
 
         // Одна глобальная сортировка вместо OrderBy внутри каждой группы
         shiftEvents.Sort((a, b) => a.TransactionDate.CompareTo(b.TransactionDate));
@@ -128,7 +122,6 @@ public static class WorkScheduleReportBuilder
 
         // Незакрытые смены
         foreach (var (empId, state) in stateByEmployee)
-        {
             result.AddRange(state.Opens.Select(shiftStart => new WorkScheduleReportRowDto
             {
                 EmployeeId = empId,
@@ -137,7 +130,6 @@ public static class WorkScheduleReportBuilder
                 ShiftEnd = null,
                 OrganizationId = state.Org.Id
             }));
-        }
 
         return result;
     }

@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// EF-сущность связи пользователя с организацией.
+///     EF-сущность связи пользователя с организацией.
 /// </summary>
 public class LinksUserOrganization
 {

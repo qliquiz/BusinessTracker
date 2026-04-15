@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BusinessTracker.Domain\BusinessTracker.Domain.csproj" />
+        <ProjectReference Include="..\BusinessTracker.Domain\BusinessTracker.Domain.csproj"/>
     </ItemGroup>
 
 </Project>

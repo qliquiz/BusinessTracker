@@ -5,7 +5,7 @@ using BusinessTracker.Domain.Models.Dto;
 namespace BusinessTracker.Domain.Logic;
 
 /// <summary>
-/// Построитель отчёта "Выручка" на основе доменных моделей транзакций.
+///     Построитель отчёта "Выручка" на основе доменных моделей транзакций.
 /// </summary>
 public static class RevenueReportBuilder
 {
@@ -13,17 +13,17 @@ public static class RevenueReportBuilder
         [TransactionType.Sale, TransactionType.Return];
 
     /// <summary>
-    /// Сформировать отчёт. Группировка — по дате (один день = одна строка).
-    /// <para>
-    /// Разбивка по типам оплаты (наличные / безналичные / прочее) будет реализована
-    /// после интеграции полной таблицы типов транзакций из MSSQL-журнала (transtype).
-    /// На данный момент вся сумма попадает в <see cref="RevenueReportRowDto.CashAmount"/>.
-    /// </para>
+    ///     Сформировать отчёт. Группировка — по дате (один день = одна строка).
+    ///     <para>
+    ///         Разбивка по типам оплаты (наличные / безналичные / прочее) будет реализована
+    ///         после интеграции полной таблицы типов транзакций из MSSQL-журнала (transtype).
+    ///         На данный момент вся сумма попадает в <see cref="RevenueReportRowDto.CashAmount" />.
+    ///     </para>
     /// </summary>
     /// <param name="transactions">Набор доменных транзакций.</param>
     /// <param name="holidays">
-    /// Набор дат, считающихся праздничными (выходные, государственные праздники и т.д.).
-    /// Если не передан — <see cref="RevenueReportRowDto.IsHoliday"/> всегда <c>false</c>.
+    ///     Набор дат, считающихся праздничными (выходные, государственные праздники и т.д.).
+    ///     Если не передан — <see cref="RevenueReportRowDto.IsHoliday" /> всегда <c>false</c>.
     /// </param>
     public static IEnumerable<RevenueReportRowDto> Build(
         IEnumerable<Transaction> transactions,
@@ -45,14 +45,14 @@ public static class RevenueReportBuilder
     }
 
     /// <summary>
-    /// Оптимизированная версия: один проход по коллекции через <see cref="Dictionary{TKey,TValue}"/>.
-    /// Исключает создание промежуточных объектов <c>IGrouping</c> и повторные проходы
-    /// по каждой группе при вычислении сумм.
+    ///     Оптимизированная версия: один проход по коллекции через <see cref="Dictionary{TKey,TValue}" />.
+    ///     Исключает создание промежуточных объектов <c>IGrouping</c> и повторные проходы
+    ///     по каждой группе при вычислении сумм.
     /// </summary>
     /// <param name="transactions">Набор доменных транзакций.</param>
     /// <param name="holidays">
-    /// Набор дат, считающихся праздничными.
-    /// Если не передан — <see cref="RevenueReportRowDto.IsHoliday"/> всегда <c>false</c>.
+    ///     Набор дат, считающихся праздничными.
+    ///     Если не передан — <see cref="RevenueReportRowDto.IsHoliday" /> всегда <c>false</c>.
     /// </param>
     public static IEnumerable<RevenueReportRowDto> BuildOptimized(
         IEnumerable<Transaction> transactions,
@@ -73,7 +73,6 @@ public static class RevenueReportBuilder
         }
 
         foreach (var (date, acc) in groups)
-        {
             yield return new RevenueReportRowDto
             {
                 Period = date,
@@ -84,6 +83,5 @@ public static class RevenueReportBuilder
                 IsHoliday = holidays?.Contains(date) ?? false,
                 OrganizationId = acc.OrgId
             };
-        }
     }
 }

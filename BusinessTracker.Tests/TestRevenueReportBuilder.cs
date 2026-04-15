@@ -5,13 +5,13 @@ using BusinessTracker.Domain.Models;
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Модульные тесты построителя отчёта "Выручка".
+///     Модульные тесты построителя отчёта "Выручка".
 /// </summary>
 public class TestRevenueReportBuilder
 {
-    private Organization _org = null!;
     private Employee _employee = null!;
     private Nomenclature _nomenclature = null!;
+    private Organization _org = null!;
 
     [SetUp]
     public void SetUp()
@@ -29,7 +29,7 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// Пустой список транзакций — пустой отчёт.
+    ///     Пустой список транзакций — пустой отчёт.
     /// </summary>
     [Test]
     public void Build_EmptyTransactions_ReturnsEmpty()
@@ -38,7 +38,7 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// Смены (StartShift / StopShift) не включаются в отчёт.
+    ///     Смены (StartShift / StopShift) не включаются в отчёт.
     /// </summary>
     [Test]
     public void Build_OnlyShiftTransactions_ReturnsEmpty()
@@ -53,15 +53,15 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// Продажа попадает в отчёт с корректной суммой.
+    ///     Продажа попадает в отчёт с корректной суммой.
     /// </summary>
     [Test]
     public void Build_SingleSale_AmountCorrect()
     {
         var transactions = new[]
         {
-            MakeTransaction(TransactionType.Sale, 100m, discount: 10m,
-                date: new DateTimeOffset(2025, 3, 10, 12, 0, 0, TimeSpan.Zero))
+            MakeTransaction(TransactionType.Sale, 100m, 10m,
+                new DateTimeOffset(2025, 3, 10, 12, 0, 0, TimeSpan.Zero))
         };
 
         var report = RevenueReportBuilder.Build(transactions).ToList();
@@ -76,7 +76,7 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// Несколько транзакций за один день группируются в одну строку.
+    ///     Несколько транзакций за один день группируются в одну строку.
     /// </summary>
     [Test]
     public void Build_MultipleTransactionsSameDay_GroupedIntoOneRow()
@@ -99,7 +99,7 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// Транзакции за разные дни дают несколько строк.
+    ///     Транзакции за разные дни дают несколько строк.
     /// </summary>
     [Test]
     public void Build_TransactionsDifferentDays_MultipleRows()
@@ -116,7 +116,7 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// День из переданного набора праздников помечается IsHoliday = true.
+    ///     День из переданного набора праздников помечается IsHoliday = true.
     /// </summary>
     [Test]
     public void Build_DateInHolidaySet_IsHolidayTrue()
@@ -135,7 +135,7 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// День не из набора праздников — IsHoliday = false.
+    ///     День не из набора праздников — IsHoliday = false.
     /// </summary>
     [Test]
     public void Build_DateNotInHolidaySet_IsHolidayFalse()
@@ -153,7 +153,7 @@ public class TestRevenueReportBuilder
     }
 
     /// <summary>
-    /// Без переданного набора праздников IsHoliday всегда false.
+    ///     Без переданного набора праздников IsHoliday всегда false.
     /// </summary>
     [Test]
     public void Build_NoHolidaysProvided_IsHolidayAlwaysFalse()
@@ -173,8 +173,9 @@ public class TestRevenueReportBuilder
         TransactionType type,
         decimal amount,
         decimal discount = 0m,
-        DateTimeOffset? date = null) =>
-        new()
+        DateTimeOffset? date = null)
+    {
+        return new Transaction
         {
             Id = Guid.NewGuid(),
             Type = type,
@@ -186,4 +187,5 @@ public class TestRevenueReportBuilder
             Employee = _employee,
             Nomenclature = _nomenclature
         };
+    }
 }

@@ -5,7 +5,7 @@ using BusinessTracker.Domain.Models.Dto;
 namespace BusinessTracker.Domain.Logic;
 
 /// <summary>
-/// Построитель отчёта "Продажи" на основе доменных моделей транзакций.
+///     Построитель отчёта "Продажи" на основе доменных моделей транзакций.
 /// </summary>
 public static class SalesReportBuilder
 {
@@ -13,8 +13,8 @@ public static class SalesReportBuilder
         [TransactionType.Sale, TransactionType.Return];
 
     /// <summary>
-    /// Сформировать отчёт. Группировка — по номенклатуре.
-    /// Включает продажи и возвраты; суммирование ведётся суммарно.
+    ///     Сформировать отчёт. Группировка — по номенклатуре.
+    ///     Включает продажи и возвраты; суммирование ведётся суммарно.
     /// </summary>
     public static IEnumerable<SalesReportRowDto> Build(IEnumerable<Transaction> transactions)
     {
@@ -39,9 +39,9 @@ public static class SalesReportBuilder
     }
 
     /// <summary>
-    /// Оптимизированная версия: один проход по коллекции через <see cref="Dictionary{TKey,TValue}"/>.
-    /// Исключает создание промежуточных объектов <c>IGrouping</c> и повторные проходы
-    /// по каждой группе при вычислении сумм.
+    ///     Оптимизированная версия: один проход по коллекции через <see cref="Dictionary{TKey,TValue}" />.
+    ///     Исключает создание промежуточных объектов <c>IGrouping</c> и повторные проходы
+    ///     по каждой группе при вычислении сумм.
     /// </summary>
     public static IEnumerable<SalesReportRowDto> BuildOptimized(IEnumerable<Transaction> transactions)
     {
@@ -55,19 +55,14 @@ public static class SalesReportBuilder
 
             var nomId = t.Nomenclature.Id;
             if (groups.TryGetValue(nomId, out var acc))
-            {
                 groups[nomId] = (acc.CatId, acc.CatName, acc.NomName,
                     acc.Qty + t.Quantity, acc.Amount + t.Amount, acc.Discount + t.Discount, acc.OrgId);
-            }
             else
-            {
                 groups[nomId] = (t.Nomenclature.Category.Id, t.Nomenclature.Category.Name,
                     t.Nomenclature.Name, t.Quantity, t.Amount, t.Discount, t.Owner.Id);
-            }
         }
 
         foreach (var (nomId, acc) in groups)
-        {
             yield return new SalesReportRowDto
             {
                 CategoryId = acc.CatId,
@@ -79,6 +74,5 @@ public static class SalesReportBuilder
                 DiscountAmount = acc.Discount,
                 OrganizationId = acc.OrgId
             };
-        }
     }
 }

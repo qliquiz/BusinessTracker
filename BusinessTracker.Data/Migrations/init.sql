@@ -1,64 +1,156 @@
 -- Creating tables and indexes
 CREATE TABLE IF NOT EXISTS "Organizations"
 (
-    "Id"          UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    "Name"        VARCHAR(255) NOT NULL,
-    "Inn"         VARCHAR(10)  NOT NULL,
-    "Address"     TEXT         NOT NULL,
+    "Id"
+    UUID
+    NOT
+    NULL
+    PRIMARY
+    KEY
+    DEFAULT
+    gen_random_uuid
+(
+),
+    "Name" VARCHAR
+(
+    255
+) NOT NULL,
+    "Inn" VARCHAR
+(
+    10
+) NOT NULL,
+    "Address" TEXT NOT NULL,
     "LoadOptions" JSONB
-);
+    );
 
 CREATE UNIQUE INDEX "OrganizationInnIx" ON "Organizations" ("Inn");
 
 CREATE TABLE IF NOT EXISTS "Categories"
 (
-    "Id"      UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    "Name"    VARCHAR(255) NOT NULL,
-    "OwnerId" UUID         NOT NULL
-);
+    "Id"
+    UUID
+    NOT
+    NULL
+    PRIMARY
+    KEY
+    DEFAULT
+    gen_random_uuid
+(
+),
+    "Name" VARCHAR
+(
+    255
+) NOT NULL,
+    "OwnerId" UUID NOT NULL
+    );
 
 CREATE TABLE IF NOT EXISTS "Employees"
 (
-    "Id"          UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    "Name"        VARCHAR(255) NOT NULL,
-    "PhoneNumber" VARCHAR(20),
-    "OwnerId"     UUID         NOT NULL,
-    "Role"        INT          NOT NULL             DEFAULT 0
-);
+    "Id"
+    UUID
+    NOT
+    NULL
+    PRIMARY
+    KEY
+    DEFAULT
+    gen_random_uuid
+(
+),
+    "Name" VARCHAR
+(
+    255
+) NOT NULL,
+    "PhoneNumber" VARCHAR
+(
+    20
+),
+    "OwnerId" UUID NOT NULL,
+    "Role" INT NOT NULL DEFAULT 0
+    );
 
 CREATE TABLE IF NOT EXISTS "Nomenclatures"
 (
-    "Id"         UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    "Name"       VARCHAR(255) NOT NULL,
-    "CategoryId" UUID         NOT NULL
-);
+    "Id"
+    UUID
+    NOT
+    NULL
+    PRIMARY
+    KEY
+    DEFAULT
+    gen_random_uuid
+(
+),
+    "Name" VARCHAR
+(
+    255
+) NOT NULL,
+    "CategoryId" UUID NOT NULL
+    );
 
 CREATE TABLE IF NOT EXISTS "Transactions"
 (
-    "Id"              UUID                     NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    "Type"            INT                      NOT NULL,
-    "OwnerId"         UUID                     NOT NULL,
+    "Id"
+    UUID
+    NOT
+    NULL
+    PRIMARY
+    KEY
+    DEFAULT
+    gen_random_uuid
+(
+),
+    "Type" INT NOT NULL,
+    "OwnerId" UUID NOT NULL,
     "TransactionDate" TIMESTAMP WITH TIME ZONE NOT NULL,
-    "NomenclatureId"  UUID                     NOT NULL,
-    "EmployeeId"      UUID                     NOT NULL,
-    "Amount"          NUMERIC(15, 2)           NOT NULL,
-    "Quantity"        NUMERIC(15, 2)           NOT NULL,
-    "Discount"        NUMERIC(15, 2)           NOT NULL
-);
+                                    "NomenclatureId" UUID NOT NULL,
+                                    "EmployeeId" UUID NOT NULL,
+                                    "Amount" NUMERIC (15, 2) NOT NULL,
+    "Quantity" NUMERIC
+(
+    15,
+    2
+) NOT NULL,
+    "Discount" NUMERIC
+(
+    15,
+    2
+) NOT NULL
+    );
 
 CREATE TABLE IF NOT EXISTS "Users"
 (
-    "Id"       UUID         NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    "Name"     VARCHAR(255) NOT NULL,
-    "Password" TEXT         NOT NULL
-);
+    "Id"
+    UUID
+    NOT
+    NULL
+    PRIMARY
+    KEY
+    DEFAULT
+    gen_random_uuid
+(
+),
+    "Name" VARCHAR
+(
+    255
+) NOT NULL,
+    "Password" TEXT NOT NULL
+    );
 
 CREATE TABLE IF NOT EXISTS "LinksUserOrganizations"
 (
-    "Id"             UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
-    "UserId"         UUID NOT NULL,
+    "Id"
+    UUID
+    NOT
+    NULL
+    PRIMARY
+    KEY
+    DEFAULT
+    gen_random_uuid
+(
+),
+    "UserId" UUID NOT NULL,
     "OrganizationId" UUID NOT NULL
-);
+    );
 
 -- Creating constraints
 

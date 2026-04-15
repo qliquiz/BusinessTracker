@@ -6,38 +6,26 @@ using BusinessTracker.Domain.Models;
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Сравнительные замеры производительности оригинальных (LINQ) и оптимизированных (Dictionary)
-/// построителей отчётов на синтетических данных.
+///     Сравнительные замеры производительности оригинальных (LINQ) и оптимизированных (Dictionary)
+///     построителей отчётов на синтетических данных.
 /// </summary>
 /// <remarks>
-/// Запуск только бенчмарков:
-/// <code>dotnet test --filter "FullyQualifiedName~BenchmarkReportBuilders" -- NUnit.DefaultTimeout=120000</code>
-/// Подробный вывод с таймингами:
-/// <code>dotnet test --filter "FullyQualifiedName~BenchmarkReportBuilders" --logger "console;verbosity=detailed"</code>
+///     Запуск только бенчмарков:
+///     <code>dotnet test --filter "FullyQualifiedName~BenchmarkReportBuilders" -- NUnit.DefaultTimeout=120000</code>
+///     Подробный вывод с таймингами:
+///     <code>dotnet test --filter "FullyQualifiedName~BenchmarkReportBuilders" --logger "console;verbosity=detailed"</code>
 /// </remarks>
 [TestFixture]
 public class BenchmarkReportBuilders
 {
-    private const string KladrAddress =
-        "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12";
-
-    private static readonly Organization[] Orgs =
-    [
-        new() { Id = Guid.NewGuid(), Name = "Офис СПБ", Inn = "1234567890", Address = KladrAddress },
-        new() { Id = Guid.NewGuid(), Name = "Офис ИРК", Inn = "0987654321", Address = KladrAddress }
-    ];
-
-    // Небольшой фиксированный набор для JIT-разогрева
-    private static readonly List<Transaction> WarmupData = GenerateTransactions(50);
-
     // ──────────────────────────────────────────────────────────────────────────
     //  Разогрев
     // ──────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Выполняется один раз перед всеми тестами класса.
-    /// Прогревает JIT для всех методов обоих вариантов построителей,
-    /// чтобы последующие замеры не включали накладные расходы первичной компиляции.
+    ///     Выполняется один раз перед всеми тестами класса.
+    ///     Прогревает JIT для всех методов обоих вариантов построителей,
+    ///     чтобы последующие замеры не включали накладные расходы первичной компиляции.
     /// </summary>
     [OneTimeSetUp]
     public void WarmUp()
@@ -49,6 +37,18 @@ public class BenchmarkReportBuilders
         _ = WorkScheduleReportBuilder.Build(WarmupData).ToList();
         _ = WorkScheduleReportBuilder.BuildOptimized(WarmupData).ToList();
     }
+
+    private const string KladrAddress =
+        "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12";
+
+    private static readonly Organization[] Orgs =
+    [
+        new() { Id = Guid.NewGuid(), Name = "Офис СПБ", Inn = "1234567890", Address = KladrAddress },
+        new() { Id = Guid.NewGuid(), Name = "Офис ИРК", Inn = "0987654321", Address = KladrAddress }
+    ];
+
+    // Небольшой фиксированный набор для JIT-разогрева
+    private static readonly List<Transaction> WarmupData = GenerateTransactions(50);
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Отчёт "Выручка"
@@ -151,11 +151,11 @@ public class BenchmarkReportBuilders
     // ──────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Проверяет оба построителя на данных со смешанной оплатой.
-    /// Смешанная оплата — чек, сумма которого разбита на наличную и безналичную части;
-    /// каждая часть представлена отдельной Sale-транзакцией.
-    /// Поле PaymentType будет добавлено при интеграции MSSQL-данных;
-    /// пока обе транзакции неразличимы по типу оплаты.
+    ///     Проверяет оба построителя на данных со смешанной оплатой.
+    ///     Смешанная оплата — чек, сумма которого разбита на наличную и безналичную части;
+    ///     каждая часть представлена отдельной Sale-транзакцией.
+    ///     Поле PaymentType будет добавлено при интеграции MSSQL-данных;
+    ///     пока обе транзакции неразличимы по типу оплаты.
     /// </summary>
     [TestCase(100)]
     [TestCase(1_000)]
@@ -190,18 +190,18 @@ public class BenchmarkReportBuilders
     // ──────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Генерирует реалистичный набор транзакций для <paramref name="receiptCount"/> чеков.
+    ///     Генерирует реалистичный набор транзакций для <paramref name="receiptCount" /> чеков.
     /// </summary>
     /// <remarks>
-    /// Правила генерации:
-    /// <list type="bullet">
-    ///   <item>Чек = 1–4 позиции Sale; Amount = цена × кол-во − скидка.</item>
-    ///   <item>~5 % позиций имеют скидку 100 % (Amount приведён к минимуму 0.01).</item>
-    ///   <item>~30 % чеков — наличный расчёт со сдачей (Change).</item>
-    ///   <item>~10 % чеков содержат возврат (Return) отдельной позиции.</item>
-    ///   <item>Каждый сотрудник получает по одной паре StartShift/StopShift на каждые 200 чеков.</item>
-    /// </list>
-    /// Генератор детерминирован: фиксированный <paramref name="seed"/> даёт одни и те же данные.
+    ///     Правила генерации:
+    ///     <list type="bullet">
+    ///         <item>Чек = 1–4 позиции Sale; Amount = цена × кол-во − скидка.</item>
+    ///         <item>~5 % позиций имеют скидку 100 % (Amount приведён к минимуму 0.01).</item>
+    ///         <item>~30 % чеков — наличный расчёт со сдачей (Change).</item>
+    ///         <item>~10 % чеков содержат возврат (Return) отдельной позиции.</item>
+    ///         <item>Каждый сотрудник получает по одной паре StartShift/StopShift на каждые 200 чеков.</item>
+    ///     </list>
+    ///     Генератор детерминирован: фиксированный <paramref name="seed" /> даёт одни и те же данные.
     /// </remarks>
     private static List<Transaction> GenerateTransactions(int receiptCount, int seed = 42)
     {
@@ -222,10 +222,7 @@ public class BenchmarkReportBuilders
 
             // 1–4 позиции в чеке
             var lineCount = rng.Next(1, 5);
-            for (var line = 0; line < lineCount; line++)
-            {
-                result.Add(MakeSale(rng, org, emp, nomenclatures, date));
-            }
+            for (var line = 0; line < lineCount; line++) result.Add(MakeSale(rng, org, emp, nomenclatures, date));
 
             // ~30 % — наличный расчёт со сдачей
             if (rng.Next(100) < 30)
@@ -240,15 +237,15 @@ public class BenchmarkReportBuilders
     }
 
     /// <summary>
-    /// Генерирует чеки со смешанной оплатой.
+    ///     Генерирует чеки со смешанной оплатой.
     /// </summary>
     /// <remarks>
-    /// Каждый чек содержит 1–3 товарные позиции (Sale).
-    /// Затем сумма чека делится на наличную и безналичную части
-    /// (две отдельные Sale-транзакции с разбивкой ~60/40).
-    /// Наличная часть сопровождается транзакцией Change (сдача).
-    /// ~5 % позиций — скидка 100 %.
-    /// ~10 % чеков — возврат одной позиции.
+    ///     Каждый чек содержит 1–3 товарные позиции (Sale).
+    ///     Затем сумма чека делится на наличную и безналичную части
+    ///     (две отдельные Sale-транзакции с разбивкой ~60/40).
+    ///     Наличная часть сопровождается транзакцией Change (сдача).
+    ///     ~5 % позиций — скидка 100 %.
+    ///     ~10 % чеков — возврат одной позиции.
     /// </remarks>
     private static List<Transaction> GenerateMixedPaymentTransactions(int receiptCount, int seed = 42)
     {
@@ -351,7 +348,6 @@ public class BenchmarkReportBuilders
         var baseDate = new DateTimeOffset(2024, 1, 1, 8, 0, 0, TimeSpan.Zero);
 
         foreach (var emp in employees)
-        {
             for (var s = 0; s < shiftsPerEmployee; s++)
             {
                 var shiftStart = baseDate.AddDays(s).AddMinutes(rng.Next(0, 30));
@@ -359,7 +355,6 @@ public class BenchmarkReportBuilders
                 result.Add(
                     MakeShift(TransactionType.StopShift, shiftStart.AddHours(8 + rng.NextDouble() * 4), emp, nom));
             }
-        }
     }
 
     private static Transaction MakeSale(
@@ -370,7 +365,7 @@ public class BenchmarkReportBuilders
         var qty = Math.Round((decimal)(rng.NextDouble() * 4 + 1), 2);
         var grossAmount = unitPrice * qty;
 
-        bool fullDiscount = rng.Next(100) < 5;
+        var fullDiscount = rng.Next(100) < 5;
         var discount = fullDiscount
             ? grossAmount
             : Math.Round((decimal)rng.NextDouble() * 0.4m * grossAmount, 2);
@@ -425,8 +420,9 @@ public class BenchmarkReportBuilders
     }
 
     private static Transaction MakeShift(
-        TransactionType type, DateTimeOffset date, Employee emp, Nomenclature nom) =>
-        new()
+        TransactionType type, DateTimeOffset date, Employee emp, Nomenclature nom)
+    {
+        return new Transaction
         {
             Id = Guid.NewGuid(),
             Type = type,
@@ -438,6 +434,7 @@ public class BenchmarkReportBuilders
             Nomenclature = nom,
             Employee = emp
         };
+    }
 
     private static void PrintResult(string name, int receiptCount, int txCount, int rowCount, TimeSpan elapsed)
     {

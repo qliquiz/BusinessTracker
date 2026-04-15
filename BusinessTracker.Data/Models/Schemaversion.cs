@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// EF-сущность для таблицы истории миграций DbUp.
+///     EF-сущность для таблицы истории миграций DbUp.
 /// </summary>
 public class Schemaversion
 {

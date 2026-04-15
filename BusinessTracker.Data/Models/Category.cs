@@ -1,7 +1,7 @@
 namespace BusinessTracker.Data.Models;
 
 /// <summary>
-/// EF-сущность категории номенклатуры.
+///     EF-сущность категории номенклатуры.
 /// </summary>
 public class Category
 {

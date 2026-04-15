@@ -8,25 +8,20 @@ using BusinessTracker.Domain.Core.Attributes;
 namespace BusinessTracker.Domain.Models;
 
 /// <summary>
-/// Абстрактный класс доменной модели.
+///     Абстрактный класс доменной модели.
 /// </summary>
 public abstract class DomainModel : IErrorText, IId
 {
     private string _errorText = string.Empty;
 
     /// <summary>
-    /// Уникальный код.
-    /// </summary>
-    public Guid Id { get; init; }
-
-    /// <summary>
-    /// Флаг. Наличие ошибки.
+    ///     Флаг. Наличие ошибки.
     /// </summary>
     [JsonIgnore]
     public bool IsError => !string.IsNullOrEmpty(_errorText);
 
     /// <summary>
-    /// Текстовое сообщение об ошибке.
+    ///     Текстовое сообщение об ошибке.
     /// </summary>
     [JsonIgnore]
     public string ErrorText
@@ -36,7 +31,12 @@ public abstract class DomainModel : IErrorText, IId
     }
 
     /// <summary>
-    /// Выполнить проверку свойство модели.
+    ///     Уникальный код.
+    /// </summary>
+    public Guid Id { get; init; }
+
+    /// <summary>
+    ///     Выполнить проверку свойство модели.
     /// </summary>
     /// <returns>bool</returns>
     public virtual bool Validate()
@@ -46,10 +46,10 @@ public abstract class DomainModel : IErrorText, IId
         var results = new List<ValidationResult>();
 
         var result = Validator.TryValidateObject(
-            instance: this,
-            validationContext: context,
-            validationResults: results,
-            validateAllProperties: true);
+            this,
+            context,
+            results,
+            true);
 
         if (!result)
         {
@@ -59,7 +59,7 @@ public abstract class DomainModel : IErrorText, IId
         }
 
         // 2. Проверяем собственные атрибуты
-        var properties = this.GetType().GetProperties()
+        var properties = GetType().GetProperties()
             .Where(x => x.GetCustomAttribute<TemplateAttribute>() is not null);
         foreach (var property in properties)
         {
@@ -79,7 +79,7 @@ public abstract class DomainModel : IErrorText, IId
         }
 
         // 3. Проверяем поля рекурсивно
-        var contains = this.GetType()
+        var contains = GetType()
             .GetProperties(BindingFlags.Public | BindingFlags.Instance);
         foreach (var property in contains)
         {

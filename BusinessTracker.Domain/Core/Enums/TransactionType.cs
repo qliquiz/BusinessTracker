@@ -1,32 +1,32 @@
 namespace BusinessTracker.Domain.Core.Enums;
 
 /// <summary>
-/// Перечисление типов транзакций.
+///     Перечисление типов транзакций.
 /// </summary>
 public enum TransactionType
 {
     /// <summary>
-    /// Продажа.
+    ///     Продажа.
     /// </summary>
     Sale = 1,
 
     /// <summary>
-    /// Возврат.
+    ///     Возврат.
     /// </summary>
     Return = 2,
 
     /// <summary>
-    /// Сдача.
+    ///     Сдача.
     /// </summary>
     Change = 3,
 
     /// <summary>
-    /// Начала рабочей смены.
+    ///     Начала рабочей смены.
     /// </summary>
     StartShift = 4,
 
     /// <summary>
-    /// Окончание рабочей смены.
+    ///     Окончание рабочей смены.
     /// </summary>
     StopShift = 5
 }

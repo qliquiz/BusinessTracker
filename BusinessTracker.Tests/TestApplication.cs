@@ -8,12 +8,12 @@ using BusinessTracker.Domain.Models;
 namespace BusinessTracker.Tests;
 
 /// <summary>
-/// Набор модульных тестов в рамках приложения.
+///     Набор модульных тестов в рамках приложения.
 /// </summary>
 public class ApplicationTests
 {
     /// <summary>
-    /// Проверить получение версии приложения.
+    ///     Проверить получение версии приложения.
     /// </summary>
     [Test]
     public void CurrentVersion_Show_Any()
@@ -28,7 +28,7 @@ public class ApplicationTests
     }
 
     /// <summary>
-    /// Проверяем создание категории с null в наименовании.
+    ///     Проверяем создание категории с null в наименовании.
     /// </summary>
     [Test]
     public void Create_Category_CheckNullName()
@@ -46,7 +46,7 @@ public class ApplicationTests
     }
 
     /// <summary>
-    /// Проверяем наличие системных атрибутов.
+    ///     Проверяем наличие системных атрибутов.
     /// </summary>
     [Test]
     public void Create_Category_ExistsAttributes()
@@ -64,7 +64,7 @@ public class ApplicationTests
     }
 
     /// <summary>
-    /// Проверить наличите атрибута <see cref="TemplateAttribute"/>.
+    ///     Проверить наличите атрибута <see cref="TemplateAttribute" />.
     /// </summary>
     [Test]
     public void Create_Employee_ExistsPhoneTemplateAttribute()
@@ -94,7 +94,7 @@ public class ApplicationTests
     }
 
     /// <summary>
-    /// Проверить соответствие адреса формату КЛАДР.
+    ///     Проверить соответствие адреса формату КЛАДР.
     /// </summary>
     /// <param name="address">адрес для проверки</param>
     /// <param name="result">ожидаемый вердикт</param>
@@ -124,7 +124,7 @@ public class ApplicationTests
     }
 
     /// <summary>
-    /// Комплектная проверка. Отрицательный сценарий.
+    ///     Комплектная проверка. Отрицательный сценарий.
     /// </summary>
     [Test]
     public void Create_Transaction_FalseValidate()
@@ -166,7 +166,7 @@ public class ApplicationTests
     }
 
     /// <summary>
-    /// Комплексная проверка. Положительный сценарий.
+    ///     Комплексная проверка. Положительный сценарий.
     /// </summary>
     [Test]
     public void Create_Transaction_TrueValidate()
