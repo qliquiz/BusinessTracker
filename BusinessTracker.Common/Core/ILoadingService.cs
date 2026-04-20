@@ -11,11 +11,11 @@ public interface ILoadingService
     /// <summary>
     ///     Записать транзакции синхронно.
     /// </summary>
-    public bool Push(Organization organization, IEnumerable<JournalRowDto> transactions, CancellationToken token);
+    public bool Push(Branch branch, IEnumerable<JournalRowDto> transactions, CancellationToken token);
 
     /// <summary>
     ///     Записать транзакции асинхронно.
     /// </summary>
-    public Task<bool> PushAsync(Organization organization, IEnumerable<JournalRowDto> transactions,
+    public Task<bool> PushAsync(Branch branch, IEnumerable<JournalRowDto> transactions,
         CancellationToken token);
 }

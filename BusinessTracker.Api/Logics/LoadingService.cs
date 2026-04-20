@@ -13,18 +13,18 @@ public class LoadingService(
     IJournalRowsRepository journalRowsRepository)
     : ILoadingService
 {
-    public bool Push(Organization organization, IEnumerable<JournalRowDto> transactions, CancellationToken token)
+    public bool Push(Branch branch, IEnumerable<JournalRowDto> transactions, CancellationToken token)
     {
         LoadingSettings settings;
         try
         {
-            settings = settingsRepository.Load(organization, token).Result;
+            settings = settingsRepository.Load(branch, token).Result;
         }
         catch
         {
             settings = new LoadingSettings
             {
-                Owner = organization,
+                Owner = branch,
                 Description = "Default settings",
                 StartPosition = 0,
                 BatchSize = 1000
@@ -41,14 +41,14 @@ public class LoadingService(
         settings.StartPosition = lastCode + 1;
 
         settingsRepository.Save(settings, token).Wait(token);
-        journalRowsRepository.SaveAsync(organization.Id, innerTransactions, token).Wait(token);
+        journalRowsRepository.SaveAsync(branch.Owner.Id, innerTransactions, token).Wait(token);
 
         return true;
     }
 
-    public async Task<bool> PushAsync(Organization organization, IEnumerable<JournalRowDto> transactions,
+    public async Task<bool> PushAsync(Branch branch, IEnumerable<JournalRowDto> transactions,
         CancellationToken token)
     {
-        return await Task.Run(() => Push(organization, transactions, token), token);
+        return await Task.Run(() => Push(branch, transactions, token), token);
     }
 }

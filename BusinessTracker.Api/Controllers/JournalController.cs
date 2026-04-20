@@ -3,6 +3,7 @@ using BusinessTracker.Common.Core;
 using BusinessTracker.Data;
 using BusinessTracker.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessTracker.Api.Controllers;
 
@@ -17,25 +18,33 @@ public class JournalController(ILoadingService loadingService, BusinessTrackerCo
     /// <summary>
     ///     Принять и сохранить список транзакций от клиентского приложения.
     /// </summary>
-    /// <param name="request">Идентификатор организации и список транзакций.</param>
+    /// <param name="request">Идентификатор филиала и список транзакций.</param>
     /// <param name="token">Токен отмены.</param>
-    /// <returns>200 OK если данные приняты, 404 если организация не найдена, 400 если данных нет.</returns>
+    /// <returns>200 OK если данные приняты, 404 если филиал не найден, 400 если данных нет.</returns>
     [HttpPost("push")]
     public async Task<IActionResult> Push([FromBody] PushTransactionsRequest request, CancellationToken token)
     {
-        var orgEntity = await context.Organizations.FindAsync([request.OrganizationId], token);
-        if (orgEntity is null)
-            return NotFound($"Organization {request.OrganizationId} not found");
+        var branchEntity = await context.Branches
+            .Include(b => b.Owner)
+            .FirstOrDefaultAsync(b => b.Id == request.BranchId, token);
 
-        var organization = new Organization
+        if (branchEntity is null)
+            return NotFound($"Branch {request.BranchId} not found");
+
+        var branch = new Branch
         {
-            Id = orgEntity.Id,
-            Name = orgEntity.Name,
-            Inn = orgEntity.Inn,
-            Address = orgEntity.Address
+            Id = branchEntity.Id,
+            Name = branchEntity.Name,
+            Owner = new Organization
+            {
+                Id = branchEntity.Owner.Id,
+                Name = branchEntity.Owner.Name,
+                Inn = branchEntity.Owner.Inn,
+                Address = branchEntity.Owner.Address
+            }
         };
 
-        var result = await loadingService.PushAsync(organization, request.Transactions, token);
+        var result = await loadingService.PushAsync(branch, request.Transactions, token);
 
         return result ? Ok() : BadRequest("No new transactions to process");
     }

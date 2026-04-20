@@ -30,6 +30,8 @@ public static class RegistryExtension
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
 
+        services.AddHostedService<BackgroungPushService>();
+
         return services;
     }
 }

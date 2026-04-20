@@ -12,9 +12,11 @@ namespace BusinessTracker.Tests;
 /// </summary>
 public class TestLoadingSettings
 {
+    // Seed-данные: головной филиал организации СПб (создаётся миграцией V004)
+    private static readonly Guid SeedBranchId = new("f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
     private static readonly Guid SeedOrgId = new("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-    private Organization _org = null!;
 
+    private Branch _branch = null!;
     private ServiceProvider _provider = null!;
 
     [OneTimeSetUp]
@@ -39,12 +41,17 @@ public class TestLoadingSettings
     [SetUp]
     public void SetUp()
     {
-        _org = new Organization
+        _branch = new Branch
         {
-            Id = SeedOrgId,
-            Name = "Главный офис (Спб)",
-            Inn = "1234567890",
-            Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            Id = SeedBranchId,
+            Name = "Головной филиал",
+            Owner = new Organization
+            {
+                Id = SeedOrgId,
+                Name = "Главный офис (Спб)",
+                Inn = "1234567890",
+                Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            }
         };
     }
 
@@ -62,7 +69,7 @@ public class TestLoadingSettings
     {
         Assert.DoesNotThrowAsync(async () =>
         {
-            var result = await GetRepo().Load(_org, CancellationToken.None);
+            var result = await GetRepo().Load(_branch, CancellationToken.None);
             Assert.That(result, Is.Not.Null);
         });
     }
@@ -75,14 +82,14 @@ public class TestLoadingSettings
     {
         var settings = new LoadingSettings
         {
-            Owner = _org,
+            Owner = _branch,
             Description = "Integration test settings",
             StartPosition = 42,
             BatchSize = 250
         };
 
         await GetRepo().Save(settings, CancellationToken.None);
-        var loaded = await GetRepo().Load(_org, CancellationToken.None);
+        var loaded = await GetRepo().Load(_branch, CancellationToken.None);
 
         Assert.Multiple(() =>
         {
@@ -101,16 +108,16 @@ public class TestLoadingSettings
     {
         var first = new LoadingSettings
         {
-            Owner = _org, Description = "First", StartPosition = 1, BatchSize = 100
+            Owner = _branch, Description = "First", StartPosition = 1, BatchSize = 100
         };
         var second = new LoadingSettings
         {
-            Owner = _org, Description = "Second", StartPosition = 99, BatchSize = 500
+            Owner = _branch, Description = "Second", StartPosition = 99, BatchSize = 500
         };
 
         await GetRepo().Save(first, CancellationToken.None);
         await GetRepo().Save(second, CancellationToken.None);
-        var loaded = await GetRepo().Load(_org, CancellationToken.None);
+        var loaded = await GetRepo().Load(_branch, CancellationToken.None);
 
         Assert.Multiple(() =>
         {
@@ -121,40 +128,48 @@ public class TestLoadingSettings
     }
 
     /// <summary>
-    ///     Load для несуществующей организации бросает <see cref="InvalidDataException" />.
+    ///     Load для несуществующего филиала бросает <see cref="InvalidDataException" />.
     /// </summary>
     [Test]
-    public void Load_UnknownOrganization_ThrowsInvalidDataException()
+    public void Load_UnknownBranch_ThrowsInvalidDataException()
     {
-        var unknownOrg = new Organization
+        var unknownBranch = new Branch
         {
             Id = Guid.NewGuid(),
             Name = "Unknown",
-            Inn = "0000000000",
-            Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            Owner = new Organization
+            {
+                Id = Guid.NewGuid(), Name = "Unknown",
+                Inn = "0000000000",
+                Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            }
         };
 
         Assert.ThrowsAsync<InvalidDataException>(async () =>
-            await GetRepo().Load(unknownOrg, CancellationToken.None));
+            await GetRepo().Load(unknownBranch, CancellationToken.None));
     }
 
     /// <summary>
-    ///     Save для несуществующей организации бросает <see cref="InvalidDataException" />.
+    ///     Save для несуществующего филиала бросает <see cref="InvalidDataException" />.
     /// </summary>
     [Test]
-    public void Save_UnknownOrganization_ThrowsInvalidDataException()
+    public void Save_UnknownBranch_ThrowsInvalidDataException()
     {
-        var unknownOrg = new Organization
+        var unknownBranch = new Branch
         {
             Id = Guid.NewGuid(),
             Name = "Unknown",
-            Inn = "0000000000",
-            Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            Owner = new Organization
+            {
+                Id = Guid.NewGuid(), Name = "Unknown",
+                Inn = "0000000000",
+                Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            }
         };
 
         var settings = new LoadingSettings
         {
-            Owner = unknownOrg, Description = "test", StartPosition = 0, BatchSize = 100
+            Owner = unknownBranch, Description = "test", StartPosition = 0, BatchSize = 100
         };
 
         Assert.ThrowsAsync<InvalidDataException>(async () =>

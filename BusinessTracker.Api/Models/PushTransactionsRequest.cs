@@ -8,9 +8,9 @@ namespace BusinessTracker.Api.Models;
 public class PushTransactionsRequest
 {
     /// <summary>
-    ///     Идентификатор организации.
+    ///     Идентификатор филиала.
     /// </summary>
-    public Guid OrganizationId { get; set; }
+    public Guid BranchId { get; set; }
 
     /// <summary>
     ///     Список транзакций из журнала.
