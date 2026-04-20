@@ -159,59 +159,7 @@ public partial class BusinessTrackerContext : DbContext
                 .HasConstraintName("FK_JournalRows_Organizations");
         });
 
-        SeedData(modelBuilder);
-
         OnModelCreatingPartial(modelBuilder);
-    }
-
-    private static void SeedData(ModelBuilder modelBuilder)
-    {
-        var org1Id = new Guid("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-        var org2Id = new Guid("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
-        var userId = new Guid("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-        var categoryId = new Guid("c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-        var nomenclatureId = new Guid("d1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-        var employeeId = new Guid("e1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-
-        modelBuilder.Entity<Organization>().HasData(
-            new Organization
-            {
-                Id = org1Id,
-                Name = "Главный офис (Спб)",
-                Inn = "1234567890",
-                Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
-            },
-            new Organization
-            {
-                Id = org2Id,
-                Name = "Филиал (Иркутск)",
-                Inn = "0987654321",
-                Address = "230000, Иркутская обл., Октябрьский р-н, г. Иркутск, ул. 3 Июля, д. 3"
-            }
-        );
-
-        modelBuilder.Entity<User>().HasData(
-            new User { Id = userId, Name = "Администратор", Password = "admin123" }
-        );
-
-        modelBuilder.Entity<Category>().HasData(
-            new Category { Id = categoryId, Name = "Продукты питания", OwnerId = org1Id }
-        );
-
-        modelBuilder.Entity<Nomenclature>().HasData(
-            new Nomenclature { Id = nomenclatureId, Name = "Хлеб пшеничный", CategoryId = categoryId }
-        );
-
-        modelBuilder.Entity<Employee>().HasData(
-            new Employee
-            {
-                Id = employeeId,
-                Name = "Иван Иванов",
-                PhoneNumber = "+79991234567",
-                OwnerId = org1Id,
-                Role = 1
-            }
-        );
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

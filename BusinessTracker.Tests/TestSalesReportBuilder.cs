@@ -107,7 +107,7 @@ public class TestSalesReportBuilder
         var transactions = new[]
         {
             MakeTransaction(TransactionType.Sale, _bread, 100m, 5m),
-            MakeTransaction(TransactionType.Return, _bread, 20m, 1m)
+            MakeTransaction(TransactionType.Return, _bread, 20m)
         };
 
         var report = SalesReportBuilder.Build(transactions).ToList();
