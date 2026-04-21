@@ -16,7 +16,7 @@ public class ConsoleOptions
     public string ApiBaseUrl { get; set; } = "http://localhost:8000";
 
     /// <summary>
-    ///     Идентификатор филиала (Branch), данные которого загружает этот экземпляр консоли.
+    ///     Идентификатор филиала, данные которого загружает этот экземпляр консоли.
     /// </summary>
-    public Guid CompanyId { get; set; }
+    public Guid BranchId { get; set; }
 }

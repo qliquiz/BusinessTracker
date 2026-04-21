@@ -10,8 +10,8 @@ namespace BusinessTracker.Api.Logics;
 /// </summary>
 public class LoadingService(
     ILoadingSettingsRepository settingsRepository,
-    IJournalRowsRepository journalRowsRepository)
-    : ILoadingService
+    IJournalRowsRepository journalRowsRepository
+) : ILoadingService
 {
     public bool Push(Branch branch, IEnumerable<JournalRowDto> transactions, CancellationToken token)
     {

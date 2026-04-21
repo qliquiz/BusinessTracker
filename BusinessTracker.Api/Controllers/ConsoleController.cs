@@ -1,8 +1,8 @@
+using BusinessTracker.Api.Extensions;
 using BusinessTracker.Api.Models;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Data;
 using BusinessTracker.Domain.Core.Abstractions;
-using BusinessTracker.Domain.Models;
 using BusinessTracker.Domain.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,8 @@ namespace BusinessTracker.Api.Controllers;
 public class ConsoleController(
     ILoadingService loadingService,
     ILoadingSettingsRepository settingsRepository,
-    BusinessTrackerContext context) : ControllerBase
+    BusinessTrackerContext context
+) : ControllerBase
 {
     /// <summary>
     ///     Получить текущие настройки загрузки для филиала.
@@ -34,7 +35,7 @@ public class ConsoleController(
         if (branchEntity is null)
             return NotFound($"Branch {branchId} not found");
 
-        var branch = MapBranch(branchEntity);
+        var branch = BranchMapper.MapBranch(branchEntity);
         var settings = await settingsRepository.Load(branch, token);
 
         return Ok(new LoadingSettingsResponse
@@ -65,25 +66,9 @@ public class ConsoleController(
         if (branchEntity is null)
             return NotFound($"Branch {branchId} not found");
 
-        var branch = MapBranch(branchEntity);
+        var branch = BranchMapper.MapBranch(branchEntity);
         var result = await loadingService.PushAsync(branch, transactions, token);
 
         return result ? Ok() : BadRequest("No new transactions to process");
-    }
-
-    private static Branch MapBranch(Data.Models.Branch entity)
-    {
-        return new Branch
-        {
-            Id = entity.Id,
-            Name = entity.Name,
-            Owner = new Organization
-            {
-                Id = entity.Owner.Id,
-                Name = entity.Owner.Name,
-                Inn = entity.Owner.Inn,
-                Address = entity.Owner.Address
-            }
-        };
     }
 }

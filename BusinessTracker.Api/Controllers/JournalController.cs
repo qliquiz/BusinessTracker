@@ -1,7 +1,7 @@
+using BusinessTracker.Api.Extensions;
 using BusinessTracker.Api.Models;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Data;
-using BusinessTracker.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,18 +31,7 @@ public class JournalController(ILoadingService loadingService, BusinessTrackerCo
         if (branchEntity is null)
             return NotFound($"Branch {request.BranchId} not found");
 
-        var branch = new Branch
-        {
-            Id = branchEntity.Id,
-            Name = branchEntity.Name,
-            Owner = new Organization
-            {
-                Id = branchEntity.Owner.Id,
-                Name = branchEntity.Owner.Name,
-                Inn = branchEntity.Owner.Inn,
-                Address = branchEntity.Owner.Address
-            }
-        };
+        var branch = BranchMapper.MapBranch(branchEntity);
 
         var result = await loadingService.PushAsync(branch, request.Transactions, token);
 

@@ -5,6 +5,7 @@ using BusinessTracker.Domain.Models;
 using BusinessTracker.Domain.Models.Dto;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace BusinessTracker.Console.Logics;
@@ -13,10 +14,12 @@ namespace BusinessTracker.Console.Logics;
 ///     Фоновый процесс для загрузки данных журнала.
 ///     Периодически получает настройки с сервера, читает пачку из MSSQL и отправляет в API.
 /// </summary>
-public class BackgroungPushService(
+public class BackgroundPushService(
     IOptions<ConsoleOptions> options,
     IClientRepository<JournalRowDto> repo,
-    IHttpClientFactory httpFactory) : BackgroundService
+    IHttpClientFactory httpFactory,
+    ILogger<BackgroundPushService> logger
+) : BackgroundService
 {
     private readonly ConsoleOptions _options = options.Value;
 
@@ -26,14 +29,14 @@ public class BackgroungPushService(
             try
             {
                 var client = httpFactory.CreateClient("api");
-                var url = $"/console/{_options.CompanyId}";
+                var url = $"/console/{_options.BranchId}";
 
                 // Получаем текущие настройки для филиала
                 var settingsResponse = await client.GetAsync(url, stoppingToken);
                 if (!settingsResponse.IsSuccessStatusCode)
                 {
-                    System.Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss}] Не удалось получить настройки: {settingsResponse.StatusCode}. Повтор через 1 мин.");
+                    logger.LogWarning("Не удалось получить настройки: {StatusCode}. Повтор через 1 мин.",
+                        settingsResponse.StatusCode);
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                     continue;
                 }
@@ -68,7 +71,7 @@ public class BackgroungPushService(
 
                 if (rows.Count == 0)
                 {
-                    System.Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Новых транзакций нет. Ожидание 1 час...");
+                    logger.LogInformation("Новых транзакций нет. Ожидание 1 час...");
                     await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
                     continue;
                 }
@@ -77,9 +80,8 @@ public class BackgroungPushService(
                 var pushResponse = await client.PostAsJsonAsync(url, rows, stoppingToken);
                 pushResponse.EnsureSuccessStatusCode();
 
-                System.Console.WriteLine(
-                    $"[{DateTime.Now:HH:mm:ss}] Передано {rows.Count} транзакций. " +
-                    $"Позиция: {dto.StartPosition} → {rows.Max(r => r.Code) + 1}");
+                logger.LogInformation("Передано {Count} транзакций. Позиция: {From} → {To}",
+                    rows.Count, dto.StartPosition, rows.Max(r => r.Code) + 1);
             }
             catch (OperationCanceledException)
             {
@@ -87,9 +89,7 @@ public class BackgroungPushService(
             }
             catch (Exception ex)
             {
-                System.Console.ForegroundColor = ConsoleColor.Red;
-                System.Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Ошибка: {ex.Message}");
-                System.Console.ResetColor();
+                logger.LogError(ex, "Ошибка при загрузке данных");
                 await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
     }
