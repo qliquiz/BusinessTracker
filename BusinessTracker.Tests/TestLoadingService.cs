@@ -17,8 +17,9 @@ namespace BusinessTracker.Tests;
 public class TestLoadingService
 {
     private static readonly Guid SeedOrgId = new("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-    private Organization _org = null!;
+    private static readonly Guid SeedBranchId = new("f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
+    private Branch _branch = null!;
     private ServiceProvider _provider = null!;
 
     [OneTimeSetUp]
@@ -76,19 +77,24 @@ public class TestLoadingService
     [SetUp]
     public void SetUp()
     {
-        _org = new Organization
+        _branch = new Branch
         {
-            Id = SeedOrgId,
-            Name = "Главный офис (Спб)",
-            Inn = "1234567890",
-            Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            Id = SeedBranchId,
+            Name = "Головной филиал",
+            Owner = new Organization
+            {
+                Id = SeedOrgId,
+                Name = "Главный офис (Спб)",
+                Inn = "1234567890",
+                Address = "190000, Ленинградская обл., Ломоносовский р-н, г. Ломоносов, ул. Советская, д. 12"
+            }
         };
 
         // Сбрасываем LoadOptions перед каждым тестом, чтобы StartPosition не влиял на следующий
         using var scope = _provider.CreateScope();
         var ctx = scope.ServiceProvider.GetRequiredService<BusinessTrackerContext>();
-        var org = ctx.Organizations.First(o => o.Id == SeedOrgId);
-        org.LoadOptions = null;
+        var branch = ctx.Branches.First(b => b.Id == SeedBranchId);
+        branch.LoadOptions = null;
         ctx.SaveChanges();
     }
 
@@ -112,7 +118,7 @@ public class TestLoadingService
         var (settingsRepo, journalRepo, _) = GetServices();
         var loadingService = new LoadingServiceTestAdapter(settingsRepo, journalRepo);
 
-        var result = await loadingService.PushAsync(_org, [], CancellationToken.None);
+        var result = await loadingService.PushAsync(_branch, [], CancellationToken.None);
 
         Assert.That(result, Is.False);
     }
@@ -128,7 +134,7 @@ public class TestLoadingService
 
         var transactions = BuildTransactions(9000001, 3);
 
-        var result = await loadingService.PushAsync(_org, transactions, CancellationToken.None);
+        var result = await loadingService.PushAsync(_branch, transactions, CancellationToken.None);
 
         Assert.That(result, Is.True);
     }
@@ -145,7 +151,7 @@ public class TestLoadingService
         var startCode = 9999001L + new Random().Next(0, 9000);
         var transactions = BuildTransactions(startCode, 2);
 
-        await loadingService.PushAsync(_org, transactions, CancellationToken.None);
+        await loadingService.PushAsync(_branch, transactions, CancellationToken.None);
 
         var saved = await ctx.JournalRows
             .Where(r => r.OrganizationId == SeedOrgId && r.Code >= startCode)
@@ -190,18 +196,18 @@ file class LoadingServiceTestAdapter
         _journal = journal;
     }
 
-    public async Task<bool> PushAsync(Organization organization, IEnumerable<JournalRowDto> transactions,
+    public async Task<bool> PushAsync(Branch branch, IEnumerable<JournalRowDto> transactions,
         CancellationToken token)
     {
         LoadingSettings settings;
         try
         {
-            settings = await _settings.Load(organization, token);
+            settings = await _settings.Load(branch, token);
         }
         catch
         {
             settings = new LoadingSettings
-                { Owner = organization, Description = "Default", StartPosition = 0, BatchSize = 1000 };
+                { Owner = branch, Description = "Default", StartPosition = 0, BatchSize = 1000 };
         }
 
         var list = transactions.Where(x => x.Code >= settings.StartPosition).ToList();
@@ -209,7 +215,7 @@ file class LoadingServiceTestAdapter
 
         settings.StartPosition = list.Max(x => x.Code) + 1;
         await _settings.Save(settings, token);
-        await _journal.SaveAsync(organization.Id, list, token);
+        await _journal.SaveAsync(branch.Owner.Id, list, token);
         return true;
     }
 }

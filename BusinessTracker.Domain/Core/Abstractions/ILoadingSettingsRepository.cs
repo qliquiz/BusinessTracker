@@ -17,10 +17,10 @@ public interface ILoadingSettingsRepository
     /// <summary>
     ///     Load settings.
     /// </summary>
-    /// <param name="organization">Organization model.</param>
+    /// <param name="branch">Branch model.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>
     ///     <see cref="LoadingSettings" />
     /// </returns>
-    public Task<LoadingSettings> Load(Organization organization, CancellationToken cancellationToken);
+    public Task<LoadingSettings> Load(Branch branch, CancellationToken cancellationToken);
 }

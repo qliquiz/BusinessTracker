@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="dbup" Version="5.0.41"/>
         <PackageReference Include="dbup-postgresql" Version="7.0.1"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0"/>
@@ -20,10 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Migrations\*.*"/>
-        <EmbeddedResource Include="Migrations\*.*">
-            <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-        </EmbeddedResource>
+        <EmbeddedResource Include="Scripts\*.sql"/>
     </ItemGroup>
 
     <ItemGroup>

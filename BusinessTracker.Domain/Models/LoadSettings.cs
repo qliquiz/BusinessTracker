@@ -8,10 +8,10 @@ namespace BusinessTracker.Domain.Models;
 public class LoadingSettings : DomainModel
 {
     /// <summary>
-    ///     Организация владелец.
+    ///     Филиал-владелец.
     /// </summary>
     [Required]
-    public Organization Owner { get; set; } = null!;
+    public Branch Owner { get; set; } = null!;
 
     /// <summary>
     ///     Описание.

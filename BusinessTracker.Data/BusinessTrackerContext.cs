@@ -32,6 +32,8 @@ public partial class BusinessTrackerContext : DbContext
 
     public virtual DbSet<Nomenclature> Nomenclatures { get; set; }
 
+    public virtual DbSet<Branch> Branches { get; set; }
+
     public virtual DbSet<Organization> Organizations { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
@@ -101,6 +103,19 @@ public partial class BusinessTrackerContext : DbContext
                 .HasConstraintName("FK_Nomenclatures_Categories");
         });
 
+        modelBuilder.Entity<Branch>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("Branches_pkey");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.Name).HasMaxLength(255);
+            entity.Property(e => e.LoadOptions).HasColumnType("jsonb");
+
+            entity.HasOne(d => d.Owner).WithMany(p => p.Branches)
+                .HasForeignKey(d => d.OrganizationId)
+                .HasConstraintName("FK_Branches_Organizations");
+        });
+
         modelBuilder.Entity<Organization>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Organizations_pkey");
@@ -109,7 +124,6 @@ public partial class BusinessTrackerContext : DbContext
 
             entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.Inn).HasMaxLength(10);
-            entity.Property(e => e.LoadOptions).HasColumnType("jsonb");
             entity.Property(e => e.Name).HasMaxLength(255);
         });
 

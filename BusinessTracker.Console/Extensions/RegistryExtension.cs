@@ -12,8 +12,7 @@ namespace BusinessTracker.Console.Extensions;
 /// </summary>
 public static class RegistryExtension
 {
-    public static IServiceCollection RegisterConsoleServices(
-        this IServiceCollection services,
+    public static void RegisterConsoleServices(this IServiceCollection services,
         IConfiguration configuration)
     {
         services.Configure<ConsoleOptions>(configuration.GetSection(nameof(ConsoleOptions)));
@@ -30,6 +29,6 @@ public static class RegistryExtension
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
 
-        return services;
+        services.AddHostedService<BackgroundPushService>();
     }
 }

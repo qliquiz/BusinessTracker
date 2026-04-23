@@ -15,7 +15,10 @@ public class JournalRowsRepository : IJournalRowsRepository
 {
     private readonly BusinessTrackerContext _context;
 
-    public JournalRowsRepository(BusinessTrackerContext context) => _context = context;
+    public JournalRowsRepository(BusinessTrackerContext context)
+    {
+        _context = context;
+    }
 
     /// <inheritdoc />
     public async Task SaveAsync(Guid organizationId, IEnumerable<JournalRowDto> transactions, CancellationToken token)

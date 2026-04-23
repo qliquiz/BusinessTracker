@@ -17,8 +17,7 @@ public class Organization
     /// <summary>Юридический адрес (формат КЛАДР).</summary>
     public string Address { get; set; } = null!;
 
-    /// <summary>Настройки загрузки данных в формате JSON.</summary>
-    public string? LoadOptions { get; set; }
+    public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
 
     public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
 

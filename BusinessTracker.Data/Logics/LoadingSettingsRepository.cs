@@ -19,24 +19,24 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
     /// <inheritdoc />
     public async Task Save(LoadingSettings loadingSettings, CancellationToken cancellationToken)
     {
-        var companyId = loadingSettings.Owner.Id;
-        var company = _context.Organizations.FirstOrDefault(x => x.Id == companyId)
-                      ?? throw new InvalidDataException($"Organization {companyId} not found");
+        var branchId = loadingSettings.Owner.Id;
+        var branch = _context.Branches.FirstOrDefault(x => x.Id == branchId)
+                     ?? throw new InvalidDataException($"Branch {branchId} not found");
 
-        company.LoadOptions = JsonSerializer.Serialize(loadingSettings);
+        branch.LoadOptions = JsonSerializer.Serialize(loadingSettings);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<LoadingSettings> Load(Organization organization, CancellationToken cancellationToken)
+    public Task<LoadingSettings> Load(Branch branch, CancellationToken cancellationToken)
     {
-        var item = _context.Organizations.FirstOrDefault(x => x.Id == organization.Id)
-                   ?? throw new InvalidDataException($"Organization {organization.Id} not found");
+        var item = _context.Branches.FirstOrDefault(x => x.Id == branch.Id)
+                   ?? throw new InvalidDataException($"Branch {branch.Id} not found");
 
         if (string.IsNullOrEmpty(item.LoadOptions))
             return Task.FromResult(new LoadingSettings
             {
-                Owner = organization,
+                Owner = branch,
                 Description = "Default settings",
                 StartPosition = 0,
                 BatchSize = 1000
@@ -44,7 +44,7 @@ public class LoadingSettingsRepository : ILoadingSettingsRepository
 
         var result = JsonSerializer.Deserialize<LoadingSettings>(item.LoadOptions)
                      ?? throw new InvalidDataException(
-                         $"Failed to deserialize settings for organization {organization.Id}");
+                         $"Failed to deserialize settings for branch {branch.Id}");
         return Task.FromResult(result);
     }
 }

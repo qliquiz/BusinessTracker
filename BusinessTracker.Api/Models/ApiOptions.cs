@@ -14,4 +14,9 @@ public class ApiOptions
     ///     Строка подключения к MSSQL (если требуется прямое чтение из legacy-БД).
     /// </summary>
     public string MsSqlConnectionString { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     Идентификатор филиала по умолчанию.
+    /// </summary>
+    public Guid BranchId { get; set; }
 }
