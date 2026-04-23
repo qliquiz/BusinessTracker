@@ -24,7 +24,7 @@ Log.Logger = new LoggerConfiguration()
     )
     .CreateLogger();
 
-builder.Host.UseSerilog();
+// builder.Host.UseSerilog();
 
 DatabaseMigrator.Migrate(connectionString);
 
