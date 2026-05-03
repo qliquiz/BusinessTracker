@@ -149,7 +149,11 @@ Scalar подключён через `Microsoft.AspNetCore.OpenApi` + `Scalar.As
 ```json
 {
   "organizationId": "<uuid>",
-  "transactions": [ { ... } ]
+  "transactions": [
+    {
+      ...
+    }
+  ]
 }
 ```
 
@@ -273,15 +277,15 @@ erDiagram
         TEXT NomenclatureName
     }
 
-    Organizations ||--o{ Categories : "владеет"
-    Organizations ||--o{ Employees : "владеет"
-    Organizations ||--o{ Transactions : "владеет"
-    Organizations ||--o{ LinksUserOrganizations : "привязана"
-    Organizations ||--o{ JournalRows : "владеет"
-    Users ||--o{ LinksUserOrganizations : "привязан"
-    Categories ||--o{ Nomenclatures : "содержит"
-    Nomenclatures ||--o{ Transactions : "участвует"
-    Employees ||--o{ Transactions : "выполняет"
+    Organizations ||--o{ Categories: "владеет"
+    Organizations ||--o{ Employees: "владеет"
+    Organizations ||--o{ Transactions: "владеет"
+    Organizations ||--o{ LinksUserOrganizations: "привязана"
+    Organizations ||--o{ JournalRows: "владеет"
+    Users ||--o{ LinksUserOrganizations: "привязан"
+    Categories ||--o{ Nomenclatures: "содержит"
+    Nomenclatures ||--o{ Transactions: "участвует"
+    Employees ||--o{ Transactions: "выполняет"
 ```
 
 ### Перечисления
@@ -365,6 +369,173 @@ dotnet run --project BusinessTracker.Api
 Все интеграционные тесты используют DI-контейнер (`ServiceProvider`) через `RegisterBusinessTrackerData(configuration)`.
 `TestLoadingService` дополнительно гарантирует наличие таблицы `JournalRows` и сбрасывает `LoadOptions` организации
 перед каждым тестом.
+
+---
+
+## Step 4: Фоновая обработка данных (нормализация)
+
+### Задача
+
+После приёма сырых строк журнала в `JournalRows` запускается фоновый пайплайн, который:
+
+1. Читает необработанные записи на основе `LoadingSettings`
+2. Определяет новые категории, номенклатуру и сотрудников (отсутствующих в БД)
+3. Сохраняет найденные сущности в БД
+4. Строит нормализованные `Transactions` со всеми связями
+
+---
+
+### Новые интерфейсы (`BusinessTracker.Domain/Core/Abstractions/`)
+
+| Интерфейс                   | Группа                         | Описание                                                                             |
+|-----------------------------|--------------------------------|--------------------------------------------------------------------------------------|
+| `INewJournalRowsProvider`   | Получение данных по настройкам | Читает из `JournalRows` записи с `Code >= StartPosition`, не более `BatchSize`       |
+| `INewCategoriesDetector`    | Определение новых сущностей    | Находит категории из `JournalRowDto.CategoryName/CategoryCode`, отсутствующие в БД   |
+| `INewNomenclaturesDetector` | Определение новых сущностей    | Находит позиции из `JournalRowDto.NomenclatureName/ProductCode`, отсутствующие в БД  |
+| `INewEmployeesDetector`     | Определение новых сущностей    | Находит сотрудников из `JournalRowDto.EmployeeName/EmployeeCode`, отсутствующих в БД |
+| `ICategoryRepository`       | Запись данных                  | Сохранение и чтение категорий                                                        |
+| `INomenclatureRepository`   | Запись данных                  | Сохранение и чтение номенклатуры                                                     |
+| `IEmployeeRepository`       | Запись данных                  | Сохранение и чтение сотрудников                                                      |
+
+---
+
+### UML: Диаграмма интерфейсов
+
+```mermaid
+classDiagram
+    direction TB
+
+    class INewJournalRowsProvider {
+        <<interface>>
+        +GetUnprocessedAsync(LoadingSettings, CancellationToken) Task~IEnumerable~JournalRowDto~~
+    }
+
+    class INewCategoriesDetector {
+        <<interface>>
+        +DetectAsync(Organization, IEnumerable~JournalRowDto~, CancellationToken) Task~IEnumerable~Category~~
+    }
+
+    class INewNomenclaturesDetector {
+        <<interface>>
+        +DetectAsync(IEnumerable~Category~, IEnumerable~JournalRowDto~, CancellationToken) Task~IEnumerable~Nomenclature~~
+    }
+
+    class INewEmployeesDetector {
+        <<interface>>
+        +DetectAsync(Organization, IEnumerable~JournalRowDto~, CancellationToken) Task~IEnumerable~Employee~~
+    }
+
+    class ICategoryRepository {
+        <<interface>>
+        +SaveAsync(IEnumerable~Category~, CancellationToken) Task
+        +GetByOwnerAsync(Guid, CancellationToken) Task~IEnumerable~Category~~
+    }
+
+    class INomenclatureRepository {
+        <<interface>>
+        +SaveAsync(IEnumerable~Nomenclature~, CancellationToken) Task
+        +GetByCategoryAsync(Guid, CancellationToken) Task~IEnumerable~Nomenclature~~
+    }
+
+    class IEmployeeRepository {
+        <<interface>>
+        +SaveAsync(IEnumerable~Employee~, CancellationToken) Task
+        +GetByOwnerAsync(Guid, CancellationToken) Task~IEnumerable~Employee~~
+    }
+
+    class ILoadingSettingsRepository {
+        <<interface>>
+        +Save(LoadingSettings, CancellationToken) Task
+        +Load(Branch, CancellationToken) Task~LoadingSettings~
+    }
+
+    class IJournalRowsRepository {
+        <<interface>>
+        +SaveAsync(Guid, IEnumerable~JournalRowDto~, CancellationToken) Task
+    }
+
+    INewJournalRowsProvider ..> ILoadingSettingsRepository: зависит от
+    INewCategoriesDetector ..> ICategoryRepository: использует для проверки
+    INewNomenclaturesDetector ..> INomenclatureRepository: использует для проверки
+    INewEmployeesDetector ..> IEmployeeRepository: использует для проверки
+    IJournalRowsRepository <.. INewJournalRowsProvider: читает строки
+```
+
+---
+
+### UML: Алгоритм фоновой обработки
+
+```mermaid
+sequenceDiagram
+    participant BW as BackgroundWorker
+    participant SR as ILoadingSettingsRepository
+    participant JP as INewJournalRowsProvider
+    participant CD as INewCategoriesDetector
+    participant CR as ICategoryRepository
+    participant ND as INewNomenclaturesDetector
+    participant NR as INomenclatureRepository
+    participant ED as INewEmployeesDetector
+    participant ER as IEmployeeRepository
+    BW ->> SR: Load(branch)
+    SR -->> BW: LoadingSettings
+    BW ->> JP: GetUnprocessedAsync(settings)
+    JP -->> BW: IEnumerable~JournalRowDto~
+    Note over BW: Шаг 1 — Категории
+    BW ->> CD: DetectAsync(org, rows)
+    CD ->> CR: GetByOwnerAsync(orgId)
+    CR -->> CD: existing Category[]
+    CD -->> BW: new Category[]
+    BW ->> CR: SaveAsync(newCategories)
+    Note over BW: Шаг 2 — Номенклатура
+    BW ->> CR: GetByOwnerAsync(orgId)
+    CR -->> BW: allCategories
+    BW ->> ND: DetectAsync(allCategories, rows)
+    ND ->> NR: GetByCategoryAsync(categoryId)
+    NR -->> ND: existing Nomenclature[]
+    ND -->> BW: new Nomenclature[]
+    BW ->> NR: SaveAsync(newNomenclatures)
+    Note over BW: Шаг 3 — Сотрудники
+    BW ->> ED: DetectAsync(org, rows)
+    ED ->> ER: GetByOwnerAsync(orgId)
+    ER -->> ED: existing Employee[]
+    ED -->> BW: new Employee[]
+    BW ->> ER: SaveAsync(newEmployees)
+    Note over BW: Шаг 4 — Финализация
+    BW ->> SR: Save(settings с обновлённым StartPosition)
+```
+
+---
+
+### Предполагаемый алгоритм реализации
+
+Реализация `BackgroundWorker` выполняет следующие шаги:
+
+1. **Загрузка настроек** — `ILoadingSettingsRepository.Load(branch)` возвращает `LoadingSettings` с текущим
+   `StartPosition` и `BatchSize`.
+
+2. **Чтение необработанных строк** — `INewJournalRowsProvider.GetUnprocessedAsync(settings)` делает выборку из таблицы
+   `JournalRows` по условию `Code >= StartPosition LIMIT BatchSize`.
+
+3. **Определение и сохранение новых категорий**
+    - `INewCategoriesDetector.DetectAsync(org, rows)`: читает существующие категории через
+      `ICategoryRepository.GetByOwnerAsync`, сопоставляет по `CategoryCode + CategoryName`, возвращает разницу.
+    - `ICategoryRepository.SaveAsync(newCategories)`: сохраняет новые категории.
+
+4. **Определение и сохранение новой номенклатуры**
+    - После шага 3 перечитываются все категории (включая только что добавленные).
+    - `INewNomenclaturesDetector.DetectAsync(allCategories, rows)`: сопоставляет по `ProductCode + NomenclatureName`,
+      привязывает к категории.
+    - `INomenclatureRepository.SaveAsync(newNomenclatures)`.
+
+5. **Определение и сохранение новых сотрудников**
+    - `INewEmployeesDetector.DetectAsync(org, rows)`: сопоставляет по `EmployeeCode + EmployeeName`.
+    - `IEmployeeRepository.SaveAsync(newEmployees)`.
+
+6. **Обновление позиции** — `StartPosition` устанавливается равным максимальному `Code` обработанного батча, настройки
+   сохраняются через `ILoadingSettingsRepository.Save`.
+
+> Два варианта запуска: **непосредственная обработка** (inline в `PushAsync`) и **отложенная** (фоновый сервис
+`IHostedService`). Step 4 предполагает реализацию обоих вариантов с замером производительности через бенчмарки.
 
 ---
 
