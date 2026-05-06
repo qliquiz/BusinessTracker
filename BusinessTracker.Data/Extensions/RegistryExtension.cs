@@ -1,3 +1,4 @@
+using BusinessTracker.Common.Core;
 using BusinessTracker.Data.Logics;
 using BusinessTracker.Domain.Core.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,9 @@ public static class RegistryExtension
         services.AddDbContext<BusinessTrackerContext>(x => x.UseNpgsql(connectionString));
         services.AddScoped<ILoadingSettingsRepository, LoadingSettingsRepository>();
         services.AddScoped<IJournalRowsRepository, JournalRowsRepository>();
+        services.AddScoped<IJournalDataSource, JournalDataSource>();
+        services.AddScoped<IBusinessDataRepository, BusinessDataRepository>();
+        services.AddScoped<IEntityExtractor, EntityExtractor>();
 
         return services;
     }

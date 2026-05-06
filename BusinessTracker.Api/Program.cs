@@ -1,5 +1,6 @@
 using BusinessTracker.Api.Logics;
 using BusinessTracker.Api.Models;
+using BusinessTracker.Api.Workers;
 using BusinessTracker.Common.Core;
 using BusinessTracker.Data.Extensions;
 using Scalar.AspNetCore;
@@ -30,6 +31,7 @@ DatabaseMigrator.Migrate(connectionString);
 
 builder.Services.RegisterBusinessTrackerData(connectionString);
 builder.Services.AddScoped<ILoadingService, LoadingService>();
+builder.Services.AddHostedService<JournalNormalizationWorker>();
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
