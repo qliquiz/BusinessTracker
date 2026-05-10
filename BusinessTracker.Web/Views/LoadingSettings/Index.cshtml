@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Настройки загрузки";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Настройки загрузки</h5>
+            </div>
+            <div class="card-body">
+
+                @if (TempData["SuccessMessage"] is string msg)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @msg
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form asp-action="Index" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="branchId" class="form-label fw-semibold">Филиал</label>
+                        <select id="branchId" name="branchId" class="form-select" required>
+                            <option value="">Выберите из списка</option>
+                            @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Branches)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Редактировать</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
