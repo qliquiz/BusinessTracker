@@ -1,0 +1,53 @@
+@model LoadingSettingsViewModel
+@{
+    ViewData["Title"] = $"Настройки — {ViewBag.BranchName}";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">Настройки загрузки</h5>
+                <span class="badge bg-secondary">@ViewBag.BranchName</span>
+            </div>
+            <div class="card-body">
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <form asp-action="Edit" asp-route-branchId="@Model.BranchId" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-semibold"></label>
+                        <input asp-for="Description" class="form-control" placeholder="Описание настроек"/>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="StartPosition" class="form-label fw-semibold"></label>
+                        <input asp-for="StartPosition" type="number" min="0" class="form-control"/>
+                        <div class="form-text">Уникальный код транзакции, с которой начинается загрузка.</div>
+                        <span asp-validation-for="StartPosition" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BatchSize" class="form-label fw-semibold"></label>
+                        <input asp-for="BatchSize" type="number" min="1" class="form-control"/>
+                        <div class="form-text">Количество записей в одной загрузке (по умолчанию 1000).</div>
+                        <span asp-validation-for="BatchSize" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-success flex-grow-1">Сохранить</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Назад</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

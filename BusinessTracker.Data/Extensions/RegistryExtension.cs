@@ -38,6 +38,7 @@ public static class RegistryExtension
         services.AddScoped<IJournalDataSource, JournalDataSource>();
         services.AddScoped<IBusinessDataRepository, BusinessDataRepository>();
         services.AddScoped<IEntityExtractor, EntityExtractor>();
+        services.AddScoped<IBranchRepository, BranchRepository>();
 
         return services;
     }
